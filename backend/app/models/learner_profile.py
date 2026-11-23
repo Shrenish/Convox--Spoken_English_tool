@@ -36,9 +36,13 @@ class LearnerProfile(Base):
     __tablename__ = "learner_profiles"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
     # JSON: { fluency: 7.0, grammar: 7.0, ..., listening_response: 6.5, ... }
     skill_dims_json: Mapped[str] = mapped_column(default="{}")
+    # JSON: dimension confidence/coverage { fluency: { sample_count: 3, confidence: "HIGH" }, ... }
+    dimension_coverage_json: Mapped[str] = mapped_column(default="{}")
+    # JSON array of applied evaluation IDs to guarantee idempotent updates: ["eval_id_1", ...]
+    applied_evaluations_json: Mapped[str] = mapped_column(default="[]")
     # JSON array of interests: ["technology", "AI", "travel"]
     interests_json: Mapped[str] = mapped_column(default="[]")
     # JSON: { correction_frequency, speaking_speed, challenge_level, persona_preference }

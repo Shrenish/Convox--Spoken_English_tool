@@ -41,10 +41,22 @@ class ConversationEngine:
         user_id: str,
         scenario_key: str,
         mode: str = "conversation",
+        request_id: str | None = None,
     ) -> tuple[Conversation, str, str | None]:
         """Create the conversation, persist the opening AI turn, synthesize it.
-        Returns (conv, opening_text, opening_audio_url)."""
+        Returns (conv, opening_text, opening_audio_url). Idempotent on request_id."""
         from ..models import User
+
+        if request_id:
+            existing = await session.scalar(
+                select(Conversation).where(Conversation.request_id == request_id)
+            )
+            if existing:
+                await session.refresh(existing, attribute_names=["turns"])
+                opening_turn = next((t for t in existing.turns if t.sequence == 0 and t.speaker == "ai"), None)
+                opening_text = opening_turn.transcript if opening_turn else ""
+                audio_url = await self._persist_tts(existing.id, opening_text, use_cache=True)
+                return existing, opening_text, audio_url
 
         defn = await get_scenario_def(session, scenario_key)
 
@@ -60,6 +72,7 @@ class ConversationEngine:
         assert db_scenario is not None  # get_scenario_def synced the row
 
         conv = Conversation(
+            request_id=request_id,
             user_id=user_id,
             scenario_id=db_scenario.id,
             mode=mode,
@@ -84,10 +97,9 @@ class ConversationEngine:
     async def end_conversation(
         self, session: AsyncSession, conversation_id: str
     ) -> Conversation:
-        conv = await self._require(session, conversation_id)
-        conv.status = "completed"
-        conv.ended_at = datetime.now(timezone.utc)
-        await session.flush()
+        from .finalization_service import finalize_conversation
+
+        conv, _ = await finalize_conversation(session, conversation_id, enqueue_evaluation=True)
         return conv
 
     # ------------------------------------------------------------------
@@ -99,12 +111,35 @@ class ConversationEngine:
         session: AsyncSession,
         conversation_id: str,
         *,
+        request_id: str | None = None,
         audio_bytes: bytes | None = None,
         audio_filename: str | None = None,
         transcript_override: str | None = None,
     ) -> dict[str, Any]:
         """Return shape matches TurnResponse (plus `ai_audio_path` which the router
         converts to a URL)."""
+        if request_id:
+            existing_user_turn = await session.scalar(
+                select(Turn).where(Turn.request_id == request_id)
+            )
+            if existing_user_turn:
+                # Turn already processed, return matching response
+                ai_turn = await session.scalar(
+                    select(Turn).where(
+                        Turn.conversation_id == conversation_id,
+                        Turn.sequence == existing_user_turn.sequence + 1,
+                    )
+                )
+                return {
+                    "user_transcript": existing_user_turn.transcript,
+                    "ai_transcript": ai_turn.transcript if ai_turn else "",
+                    "ai_audio_path": await self._persist_tts(conversation_id, ai_turn.transcript, use_cache=True) if ai_turn else None,
+                    "sequence": ai_turn.sequence if ai_turn else existing_user_turn.sequence,
+                    "event": None,
+                    "conversation_complete": False,
+                    "max_turns_reached": False,
+                }
+
         conv = await session.get(Conversation, conversation_id)
         if not conv:
             raise ConversationNotFound(conversation_id)
@@ -129,6 +164,7 @@ class ConversationEngine:
         seq_user = await self._next_sequence(session, conv.id)
         session.add(
             Turn(
+                request_id=request_id,
                 conversation_id=conv.id,
                 speaker="user",
                 sequence=seq_user,

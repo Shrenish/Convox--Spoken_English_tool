@@ -24,6 +24,7 @@ async def start_conversation(
         user_id=user.id,
         scenario_key=body.scenario_key,
         mode=body.mode,
+        request_id=body.request_id,
     )
     await session.commit()
     return TurnResponse(
@@ -40,6 +41,7 @@ async def process_turn(
     session: AsyncSession = Depends(get_session),
     audio: UploadFile | None = File(None, description="User audio (wav/ogg/webm/mp3)"),
     transcript: str | None = Form(None, description="Optional: skip STT, use text"),
+    request_id: str | None = Form(None, description="Optional: idempotent request id"),
 ) -> TurnResponse:
     """One user turn. Audio is transcribed (Groq Whisper), the AI replies, the
     reply is synthesized (OpenAI TTS) and every turn is persisted."""
@@ -48,6 +50,7 @@ async def process_turn(
         data = await conversation_engine.process_user_turn(
             session,
             conversation_id,
+            request_id=request_id,
             audio_bytes=audio_bytes,
             audio_filename=audio.filename if audio else None,
             transcript_override=transcript,

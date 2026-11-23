@@ -112,7 +112,9 @@ async def test_eval_to_autopsy_to_learner(seeded_session, monkeypatch):
     _stub_eval_model(monkeypatch)
     conv = await _make_conversation(session)
 
-    # 1) CORE evaluation
+    # 1) Finalize and then CORE evaluation
+    conv.status = "completed"
+    await session.flush()
     evaluation = await evaluate_conversation(session, conv.id)
     import json
 

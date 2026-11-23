@@ -7,12 +7,14 @@ class ConversationStartRequest(BaseModel):
     scenario_key: str
     mode: str = "conversation"          # conversation / travel / exam
     difficulty_override: float | None = None
+    request_id: str | None = None
 
 
 class TurnRequest(BaseModel):
     """A user turn. Audio arrives as multipart; this is the metadata-only shape."""
 
     transcript: str | None = Field(default=None, description="Override: use text instead of STT")
+    request_id: str | None = None
 
 
 class EventOut(BaseModel):

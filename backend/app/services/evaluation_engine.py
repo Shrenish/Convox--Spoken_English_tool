@@ -85,6 +85,9 @@ async def evaluate_conversation(
     if not conv:
         raise ConversationNotFound(conversation_id)
 
+    if conv.status != "completed":
+        raise ValueError(f"Conversation {conversation_id} is active and cannot be evaluated until completed.")
+
     existing = await session.scalar(
         select(Evaluation).where(Evaluation.conversation_id == conversation_id)
     )
