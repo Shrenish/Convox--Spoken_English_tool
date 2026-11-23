@@ -125,6 +125,15 @@ async def complete_stage(
     if stage.conversation_id is None:
         raise StageNotFound(stage_key)
 
+    # Minimum participation policy: ensure the learner participated before completing the stage
+    from ..models import Conversation, Turn
+    conv = await session.get(Conversation, stage.conversation_id)
+    if conv:
+        await session.refresh(conv, attribute_names=["turns"])
+        user_turns = [t for t in conv.turns if t.speaker == "user" and t.transcript.strip()]
+        if len(user_turns) < 1:
+            raise ValueError(f"Stage '{stage_key}' requires at least 1 meaningful learner turn before completion.")
+
     # End the conversation if the user left it open, then evaluate + learn.
     await conversation_engine.end_conversation(session, stage.conversation_id)
     evaluation = await evaluate_conversation(session, stage.conversation_id)

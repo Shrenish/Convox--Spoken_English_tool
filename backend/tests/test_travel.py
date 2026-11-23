@@ -72,6 +72,18 @@ async def test_completing_stage_scores_and_unlocks_next(seeded_session, monkeypa
     journey = await start_journey(seeded_session, DEFAULT_USER_ID)
     start = await start_stage(seeded_session, journey.id, "airport")
 
+    # Add a real user turn to satisfy minimum participation policy
+    from app.models import Turn
+    seeded_session.add(
+        Turn(
+            conversation_id=start.conversation_id,
+            speaker="user",
+            sequence=1,
+            transcript="I'd like to confirm the boarding gate, please.",
+        )
+    )
+    await seeded_session.flush()
+
     result = await complete_stage(seeded_session, journey.id, "airport")
     assert result.stage_key == "airport"
     assert result.journey_completed is False
@@ -101,7 +113,17 @@ async def test_full_journey_completion(seeded_session, monkeypatch):
 
     last = None
     for stage_def in TRAVEL_STAGES:
-        await start_stage(seeded_session, journey.id, stage_def.stage_key)
+        start_res = await start_stage(seeded_session, journey.id, stage_def.stage_key)
+        from app.models import Turn
+        seeded_session.add(
+            Turn(
+                conversation_id=start_res.conversation_id,
+                speaker="user",
+                sequence=1,
+                transcript="I'd like to confirm the boarding gate, please.",
+            )
+        )
+        await seeded_session.flush()
         result = await complete_stage(seeded_session, journey.id, stage_def.stage_key)
         last = result
 
