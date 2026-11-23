@@ -89,6 +89,10 @@ async def apply_evaluation(
         return await get_or_create_profile(session, conv.user_id)
 
     profile = await get_or_create_profile(session, conv.user_id)
+    applied_evals = list(profile.applied_evaluations)
+    if evaluation.id in applied_evals:
+        return profile
+
     merged = {**(_jsonobj(evaluation.language_scores_json)), **(_jsonobj(evaluation.interaction_scores_json))}
 
     updated: dict[str, float] = dict(profile.skill_dims)
@@ -113,6 +117,8 @@ async def apply_evaluation(
         1,
     )
     profile.sessions_completed = (profile.sessions_completed or 0) + 1
+    applied_evals.append(evaluation.id)
+    profile.set_applied_evaluations(applied_evals)
 
     # Common errors from adaptation notes, deduped by pattern. Copy to a local
     # list first — the JSON property re-parses from the column on every access,

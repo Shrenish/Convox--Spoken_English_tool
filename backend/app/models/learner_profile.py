@@ -119,6 +119,20 @@ class LearnerProfile(Base):
         except (json.JSONDecodeError, TypeError):
             return []
 
+    @property
+    def applied_evaluations(self) -> list[str]:
+        import json
+
+        try:
+            return json.loads(self.applied_evaluations_json)
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    def set_applied_evaluations(self, eval_ids: list[str]) -> None:
+        import json
+
+        self.applied_evaluations_json = json.dumps(eval_ids)
+
     def set_common_errors(self, errors: list[dict]) -> None:
         import json
 
