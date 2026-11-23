@@ -45,7 +45,27 @@ async def process_turn(
 ) -> TurnResponse:
     """One user turn. Audio is transcribed (Groq Whisper), the AI replies, the
     reply is synthesized (OpenAI TTS) and every turn is persisted."""
-    audio_bytes = await audio.read() if audio is not None else None
+    from ..config import settings
+    from ..utils.audio import is_allowed_audio
+
+    audio_bytes = None
+    if audio is not None:
+        if audio.filename and not is_allowed_audio(audio.filename):
+            raise HTTPException(status_code=400, detail=f"Unsupported audio format: {audio.filename}")
+        
+        # Stream-based bounded read: reject files exceeding MAX_AUDIO_BYTES without unbounded buffering
+        chunks = []
+        total_size = 0
+        while chunk := await audio.read(1024 * 64):  # 64 KB chunks
+            total_size += len(chunk)
+            if total_size > settings.MAX_AUDIO_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Audio file exceeds maximum size limit of {settings.MAX_AUDIO_BYTES // (1024*1024)}MB",
+                )
+            chunks.append(chunk)
+        audio_bytes = b"".join(chunks)
+
     try:
         data = await conversation_engine.process_user_turn(
             session,

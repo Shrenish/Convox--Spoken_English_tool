@@ -44,21 +44,50 @@ export async function startCapture(): Promise<CaptureController> {
     if (e.data.size > 0) chunks.push(e.data);
   };
 
-  let hardStop = window.setTimeout(() => recorder.stop(), 15_000);
+  let resolved = false;
+  let resolvePromise: ((rec: Recording) => void) | null = null;
+  const completionPromise = new Promise<Recording>((resolve) => {
+    resolvePromise = resolve;
+  });
 
-  const stop = () =>
-    new Promise<Recording>((resolve) => {
-      window.clearTimeout(hardStop);
-      recorder.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunks, { type: recorder.mimeType || mime || "audio/webm" });
-        resolve({ blob, ext: recordingExt(recorder.mimeType || mime || "") });
-      };
-      if (recorder.state !== "inactive") recorder.stop();
-    });
+  const finish = () => {
+    if (resolved) return;
+    resolved = true;
+    stream.getTracks().forEach((t) => t.stop());
+    const blob = new Blob(chunks, { type: recorder.mimeType || mime || "audio/webm" });
+    if (resolvePromise) {
+      resolvePromise({ blob, ext: recordingExt(recorder.mimeType || mime || "") });
+    }
+  };
+
+  // Register onstop before anything can trigger it
+  recorder.onstop = () => {
+    finish();
+  };
+
+  const hardStop = window.setTimeout(() => {
+    if (recorder.state !== "inactive") {
+      recorder.stop();
+    } else {
+      finish();
+    }
+  }, 15_000);
+
+  const stop = () => {
+    window.clearTimeout(hardStop);
+    if (recorder.state !== "inactive") {
+      recorder.stop();
+    } else {
+      finish();
+    }
+    return completionPromise;
+  };
 
   const cancel = () => {
     window.clearTimeout(hardStop);
+    if (recorder.state !== "inactive") {
+      recorder.stop();
+    }
     stream.getTracks().forEach((t) => t.stop());
   };
 
@@ -66,11 +95,19 @@ export async function startCapture(): Promise<CaptureController> {
   return { stop, cancel };
 }
 
-/** Play an absolute audio URL once; returns a cleanup function. */
-export function playAudio(url: string): () => void {
+/** Play an absolute audio URL once; invokes onEnd when playback finishes or on error. */
+export function playAudio(url: string, onEnd?: () => void): () => void {
   const audio = new Audio(url);
+  if (onEnd) {
+    audio.onended = () => onEnd();
+    audio.onerror = () => onEnd();
+  }
   audio.play().catch(() => {
     /* autoplay may be blocked until a user gesture — the toggle button retries */
+    if (onEnd) onEnd();
   });
-  return () => audio.pause();
+  return () => {
+    audio.pause();
+    if (onEnd) onEnd();
+  };
 }

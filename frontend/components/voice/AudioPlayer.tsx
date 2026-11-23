@@ -12,7 +12,7 @@ export function AudioPlayer({ url, label = "Play voice" }: { url?: string | null
 
   useEffect(() => {
     if (src) {
-      cleanup.current = playAudio(src);
+      cleanup.current = playAudio(src, () => setPlaying(false));
       setPlaying(true);
     }
     return () => cleanup.current?.();
@@ -24,7 +24,7 @@ export function AudioPlayer({ url, label = "Play voice" }: { url?: string | null
       cleanup.current?.();
       setPlaying(false);
     } else {
-      cleanup.current = playAudio(src);
+      cleanup.current = playAudio(src, () => setPlaying(false));
       setPlaying(true);
     }
   };

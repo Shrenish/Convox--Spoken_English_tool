@@ -19,13 +19,17 @@ __version__ = "0.1.0"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Bring the DB, scenario catalogue and default user up on start."""
+    """Bring the DB, scenario catalogue, default user up on start, and start background evaluation worker."""
+    from .services.evaluation_worker import evaluation_worker
+
     await init_db()
     async with SessionLocal() as session:
         await sync_scenarios(session)
         await get_or_create_default_user(session)
         await session.commit()
+    await evaluation_worker.start()
     yield
+    await evaluation_worker.stop()
 
 
 # Ensure the audio directory exists before the static mount below.
@@ -39,12 +43,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Local single-user dev: allow the Next.js app on any localhost port.
+# Local single-user dev: allow configured local origins.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
