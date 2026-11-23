@@ -14,12 +14,12 @@ class EvidenceItem(BaseModel):
 
 class EvaluationOut(BaseModel):
     conversation_id: str
-    language_scores: dict[str, float] = {}
-    interaction_scores: dict[str, float] = {}
+    language_scores: dict[str, float | None] = {}
+    interaction_scores: dict[str, float | None] = {}
     readiness_score: float
-    recovery_index: float
-    vocab_recovery_index: float
-    intl_gap: float
+    recovery_index: float | None = None
+    vocab_recovery_index: float | None = None
+    intl_gap: float | None = None
     confidence: str
 
 

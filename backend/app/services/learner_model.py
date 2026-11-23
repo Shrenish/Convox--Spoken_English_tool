@@ -93,6 +93,9 @@ async def apply_evaluation(
 
     updated: dict[str, float] = dict(profile.skill_dims)
     for dim, score in merged.items():
+        if score is None or not isinstance(score, (int, float)):
+            # Preserve previous value when dimension is not assessed
+            continue
         previous = updated.get(dim)
         if previous is None:
             updated[dim] = float(score)

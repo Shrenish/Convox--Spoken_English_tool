@@ -56,20 +56,29 @@ def clean_scores(raw: dict[str, Any] | None) -> dict[str, float]:
     return out
 
 
-def compute_readiness(language: dict[str, float], interaction: dict[str, float]) -> float:
-    """Weighted composite: language block 50%, interaction block 50%."""
-    blocks = ((language, _LANGUAGE_WEIGHT), (interaction, _INTERACTION_WEIGHT))
+def compute_readiness(language: dict[str, float | None], interaction: dict[str, float | None]) -> float:
+    """Weighted composite: language block 50%, interaction block 50%.
+    Computes only over assessed numeric scores."""
+    lang_vals = [v for v in language.values() if isinstance(v, (int, float)) and v is not None]
+    inter_vals = [v for v in interaction.values() if isinstance(v, (int, float)) and v is not None]
+
     parts: list[float] = []
-    for block, weight in blocks:
-        # Dimension scores are words on an ordinal scale; the mean is a fair v1 proxy.
-        if block:
-            parts.append((sum(block.values()) / len(block)) * weight)
-    return round(sum(parts), 1)
+    if lang_vals:
+        parts.append((sum(lang_vals) / len(lang_vals)) * _LANGUAGE_WEIGHT)
+    if inter_vals:
+        parts.append((sum(inter_vals) / len(inter_vals)) * _INTERACTION_WEIGHT)
+
+    if not parts:
+        return 0.0
+    total_weight = (0.5 if lang_vals else 0.0) + (0.5 if inter_vals else 0.0)
+    scale = 1.0 / (total_weight or 1.0)
+    return round(sum(parts) * scale, 1)
 
 
-def _guard_ratio(numerator: int, denominator: int) -> float:
+def _guard_ratio(numerator: int, denominator: int) -> float | None:
+    """Honest recovery index: returns None if no opportunity existed rather than claiming 100%."""
     if denominator <= 0:
-        return 1.0  # no breakdowns → nothing failed to recover
+        return None  # No breakdown opportunity observed -> not applicable
     return round(numerator / denominator, 2)
 
 
@@ -160,8 +169,38 @@ async def evaluate_conversation(
 
     language = clean_scores(main.get("language_scores"))
     interaction = clean_scores(main.get("interaction_scores"))
+    # Pronunciation is marked not assessed because text transcript lacks acoustic evidence
+    language["pronunciation"] = None
+
     raw_evidence = main.get("evidence")
-    evidence = _clean_evidence(raw_evidence)
+    learner_turns = [
+        {"id": t.id, "transcript": t.transcript, "timestamp": "00:30"}
+        for t in conv.turns
+        if t.speaker == "user"
+    ]
+
+    from .core_rubric import verify_quote_in_learner_turns
+
+    valid_evidence = []
+    if isinstance(raw_evidence, list):
+        for item in raw_evidence:
+            if not isinstance(item, dict):
+                continue
+            quote = item.get("quote", "")
+            turn_id = item.get("turn_id")
+            is_valid, matched_turn_id, server_time = verify_quote_in_learner_turns(quote, turn_id, learner_turns)
+            if is_valid:
+                valid_evidence.append({
+                    "turn_id": matched_turn_id,
+                    "timestamp": server_time,
+                    "speaker": "user",
+                    "quote": quote,
+                    "skill": item.get("skill", "general"),
+                    "impact": item.get("impact", "Medium"),
+                    "note": item.get("note", ""),
+                })
+
+    evidence = valid_evidence
     recovery = main.get("recovery") or {}
     vocab = main.get("vocab_recovery") or {}
     adaptation = main.get("adaptation_notes") or []
@@ -184,10 +223,13 @@ async def evaluate_conversation(
     readiness = compute_readiness(language, interaction)
     recovery_index = _guard_ratio(recoveries, breakdowns)
     vocab_recovery_index = _guard_ratio(preserved, gaps)
+    intl_gap = None  # None until measured baseline exists
 
-    # v1 stores no commissioned cross-context baseline (PRD §26), so the gap is
-    # carried forward from the profile rather than fabricated here.
-    intl_gap = 0.0
+    coverage = {
+        "assessed_dimensions": [k for k, v in {**language, **interaction}.items() if v is not None],
+        "not_assessed_dimensions": [k for k, v in {**language, **interaction}.items() if v is None],
+        "rubric_version": "core_v2.0",
+    }
 
     transfer = {
         "adaptation_notes": adaptation,
@@ -200,10 +242,12 @@ async def evaluate_conversation(
 
     evaluation = Evaluation(
         conversation_id=conversation_id,
+        rubric_version="core_v2.0",
         language_scores_json=json.dumps(language),
         interaction_scores_json=json.dumps(interaction),
         evidence_json=json.dumps(evidence),
         transfer_json=json.dumps(transfer),
+        coverage_json=json.dumps(coverage),
         readiness_score=readiness,
         recovery_index=recovery_index,
         vocab_recovery_index=vocab_recovery_index,

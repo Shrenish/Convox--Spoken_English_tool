@@ -121,7 +121,7 @@ async def test_eval_to_autopsy_to_learner(seeded_session, monkeypatch):
     language = json.loads(evaluation.language_scores_json)
     interaction = json.loads(evaluation.interaction_scores_json)
     assert language["fluency"] == 7.5
-    assert "pronunciation" not in language  # null → dropped
+    assert language.get("pronunciation") is None  # pronunciation unassessed without acoustic input
     assert interaction["goal_achievement"] == 8.0
     assert evaluation.confidence == "HIGH CONFIDENCE"
     assert evaluation.recovery_index == 0.5

@@ -16,7 +16,7 @@ def test_compute_readiness_balanced():
 
 
 def test_compute_readiness_ignores_empty_block():
-    assert compute_readiness({}, {"goal_achievement": 10.0}) == 5.0
+    assert compute_readiness({}, {"goal_achievement": 10.0}) == 10.0
 
 
 def test_clean_scores_drops_nulls_and_junk():
@@ -27,8 +27,8 @@ def test_clean_scores_drops_nulls_and_junk():
     assert clean_scores("garbage") == {}
 
 
-def test_guard_ratio_no_breakdowns_is_full_recovery():
-    assert _guard_ratio(0, 0) == 1.0
+def test_guard_ratio_no_breakdowns_is_none():
+    assert _guard_ratio(0, 0) is None
     assert _guard_ratio(3, 4) == 0.75
 
 
