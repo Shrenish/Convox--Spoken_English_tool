@@ -11,8 +11,9 @@ pydantic>=2.9.0
 pydantic-settings>=2.6.0
 
 # --- Database (SQLite-first, async) ---
-SQLAlchemy>=2.0.36
+SQLAlchemy[asyncio]>=2.0.36
 aiosqlite>=0.20.0
+greenlet>=3.1.0
 
 # --- LLM / voice providers ---
 anthropic>=0.40.0                 # conversation + evaluation models

@@ -18,7 +18,7 @@ export default function HomePage() {
   const [recommend, setRecommend] = useState<ScenarioRecommendation | null>(null);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
   const [scenarios, setScenarios] = useState<ScenarioOut[]>([]);
-  const [loaId, setLoadId] = useState(true);
+  const [loadId, setLoadId] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
