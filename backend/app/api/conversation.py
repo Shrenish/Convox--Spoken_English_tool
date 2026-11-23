@@ -93,6 +93,29 @@ async def list_turns(
     return await conversation_engine.list_turns(session, conversation_id)
 
 
+@router.get("/{conversation_id}/evaluation-status")
+async def get_evaluation_status(
+    conversation_id: str,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Return status of the durable background evaluation job."""
+    from sqlalchemy import select
+    from ..models.evaluation_job import EvaluationJob
+
+    job = await session.scalar(
+        select(EvaluationJob).where(EvaluationJob.conversation_id == conversation_id)
+    )
+    if not job:
+        return {"conversation_id": conversation_id, "status": "none"}
+    return {
+        "conversation_id": conversation_id,
+        "job_id": job.id,
+        "status": job.status,
+        "attempt_count": job.attempt_count,
+        "error_message": job.error_message,
+    }
+
+
 @router.get("/{conversation_id}/autopsy", response_model=AutopsyOut)
 async def conversation_autopsy(
     conversation_id: str,
