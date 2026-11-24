@@ -87,7 +87,9 @@ async def migrate(target_url: str):
 
 
 if __name__ == "__main__":
-    url = sys.argv[1] if len(sys.argv) > 1 else os.getenv("DATABASE_URL")
+    from app.config import settings
+
+    url = sys.argv[1] if len(sys.argv) > 1 else settings.async_database_url
     if not url or "sqlite" in url:
         print("\n[!] Please provide your Supabase Postgres connection string.")
         print('    Example: python migrate_sqlite_to_supabase.py "postgresql://postgres.xxx:password@aws-0-us-west-1.pooler.supabase.com:6543/postgres"\n')

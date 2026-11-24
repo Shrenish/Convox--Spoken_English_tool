@@ -35,8 +35,20 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        """Ensure Postgres/Supabase URLs use the asyncpg async driver."""
+        """Ensure Postgres/Supabase URLs use the asyncpg async driver and safely encode special chars in passwords."""
         url = self.DATABASE_URL
+        if "://" in url:
+            scheme, rest = url.split("://", 1)
+            if "@" in rest:
+                userinfo, hostinfo = rest.rsplit("@", 1)
+                if ":" in userinfo:
+                    username, password = userinfo.split(":", 1)
+                    import urllib.parse
+                    password = urllib.parse.quote(urllib.parse.unquote(password))
+                    userinfo = f"{username}:{password}"
+                rest = f"{userinfo}@{hostinfo}"
+            url = f"{scheme}://{rest}"
+
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql+asyncpg://", 1)
         elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
