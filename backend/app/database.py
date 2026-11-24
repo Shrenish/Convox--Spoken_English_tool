@@ -21,10 +21,10 @@ class Base(DeclarativeBase):
     """Declarative base for all ORM models."""
 
 
-_is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+_is_sqlite = settings.async_database_url.startswith("sqlite")
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    settings.async_database_url,
     echo=False,
     connect_args={"check_same_thread": False} if _is_sqlite else {},
 )

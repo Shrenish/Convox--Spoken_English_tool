@@ -33,6 +33,16 @@ class Settings(BaseSettings):
     # --- Database ---
     DATABASE_URL: str = f"sqlite+aiosqlite:///{BACKEND_DIR / 'convox.db'}"
 
+    @property
+    def async_database_url(self) -> str:
+        """Ensure Postgres/Supabase URLs use the asyncpg async driver."""
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url
+
     # --- Audio storage ---
     AUDIO_DIR: Path = BACKEND_DIR / "audio"
     MAX_AUDIO_BYTES: int = 10 * 1024 * 1024  # 10 MB safety cap on uploaded audio

@@ -15,6 +15,9 @@ sys.path.insert(0, str(BACKEND_DIR))
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test_convox.db"
 os.environ["MAX_TURNS"] = "6"
 os.environ["ENABLE_EVENTS"] = "false"
+os.environ["ANTHROPIC_API_KEY"] = ""
+os.environ["GROQ_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = ""
 
 import pytest_asyncio  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402

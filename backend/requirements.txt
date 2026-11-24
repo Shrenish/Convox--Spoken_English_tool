@@ -10,9 +10,10 @@ python-multipart>=0.0.12         # multipart form/file uploads (turn audio)
 pydantic>=2.9.0
 pydantic-settings>=2.6.0
 
-# --- Database (SQLite-first, async) ---
+# --- Database (SQLite-first, async, Postgres/Supabase-ready) ---
 SQLAlchemy[asyncio]>=2.0.36
 aiosqlite>=0.20.0
+asyncpg>=0.30.0
 greenlet>=3.1.0
 
 # --- LLM / voice providers ---
