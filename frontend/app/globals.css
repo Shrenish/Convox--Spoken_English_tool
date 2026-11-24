@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* -------------------------------------------------------------
+ * Dynamic Theme CSS Variables
+ * ----------------------------------------------------------- */
 :root {
   --bg-ink: #0b1020;
   --bg-surface: #131a2e;
@@ -9,61 +12,158 @@
   --border-line: #2a3557;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --header-bg: rgba(11, 16, 32, 0.85);
 }
 
 html.light {
   --bg-ink: #f8fafc;
   --bg-surface: #ffffff;
   --bg-surface-2: #f1f5f9;
-  --border-line: #cbd5e1;
+  --border-line: #e2e8f0;
   --text-main: #0f172a;
   --text-muted: #475569;
+  --card-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+  --header-bg: rgba(248, 250, 252, 0.9);
 }
 
 /* Base Body Styles */
 body {
   background-color: var(--bg-ink);
   color: var(--text-main);
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* In light mode, override hardcoded dark slate text colors to guarantee high contrast readability */
+/* -------------------------------------------------------------
+ * Light Mode Comprehensive Polish
+ * ----------------------------------------------------------- */
 html.light body {
   color: #0f172a;
 }
 
+/* High-contrast typography */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
 html.light .text-slate-50,
 html.light .text-slate-100,
-html.light .text-slate-200,
-html.light .text-slate-300 {
+html.light .text-slate-200 {
   color: #0f172a !important;
 }
 
-html.light .text-slate-400,
-html.light .text-slate-500 {
+html.light .text-slate-300 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-400 {
   color: #475569 !important;
 }
 
-html.light .text-slate-600 {
+html.light .text-slate-500 {
   color: #64748b !important;
 }
 
-html.light .border-line {
-  border-color: #cbd5e1 !important;
+html.light .text-slate-600 {
+  color: #94a3b8 !important;
 }
 
+/* Soft accent text in light mode */
+html.light .text-accent-soft {
+  color: #2563eb !important;
+  font-weight: 600;
+}
+
+/* Clean, crisp surface card styling with subtle borders & soft elevation */
 html.light .bg-surface {
   background-color: #ffffff !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06) !important;
 }
 
 html.light .bg-surface-2 {
   background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
 }
 
-/* Ensure hero gradient is clean and readable in light mode */
+html.light .border-line {
+  border-color: #e2e8f0 !important;
+}
+
+/* Card hover enhancements */
+html.light .hover\:border-accent\/40:hover,
+html.light .hover\:border-accent\/50:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.08), 0 4px 6px -4px rgba(37, 99, 235, 0.05) !important;
+}
+
+/* Hero Section Gradient Polish */
 html.light .bg-gradient-to-br {
-  background-image: linear-gradient(to bottom right, #ffffff, #f8fafc, #f1f5f9) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #eff6ff 100%) !important;
+  border-color: #dbeafe !important;
+  box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.06) !important;
+}
+
+/* Button & Badge Polish in Light Mode */
+html.light button.bg-surface-2,
+html.light a.bg-surface-2 {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+html.light button.bg-surface-2:hover,
+html.light a.bg-surface-2:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Form inputs & text fields in Light Mode */
+html.light input,
+html.light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.light input:focus,
+html.light textarea:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Badges in Light Mode */
+html.light .bg-accent\/10,
+html.light .bg-accent\/12 {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+html.light .bg-mint\/10,
+html.light .bg-mint\/12 {
+  background-color: #f0fdf4 !important;
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+}
+
+html.light .bg-amber\/10,
+html.light .bg-amber\/12 {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+}
+
+html.light .bg-rose\/10,
+html.light .bg-rose\/12 {
+  background-color: #fff1f2 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
 }
 
 /* Thin, theme-consistent scrollbars */
@@ -72,7 +172,7 @@ html.light .bg-gradient-to-br {
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 999px;
 }
 *::-webkit-scrollbar-track {
