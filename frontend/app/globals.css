@@ -15,12 +15,58 @@ html.light {
   --bg-ink: #f8fafc;
   --bg-surface: #ffffff;
   --bg-surface-2: #f1f5f9;
-  --border-line: #e2e8f0;
+  --border-line: #cbd5e1;
   --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-muted: #475569;
 }
 
-/* Thin, theme-consistent scrollbars for the transcript panes. */
+/* Base Body Styles */
+body {
+  background-color: var(--bg-ink);
+  color: var(--text-main);
+}
+
+/* In light mode, override hardcoded dark slate text colors to guarantee high contrast readability */
+html.light body {
+  color: #0f172a;
+}
+
+html.light .text-slate-50,
+html.light .text-slate-100,
+html.light .text-slate-200,
+html.light .text-slate-300 {
+  color: #0f172a !important;
+}
+
+html.light .text-slate-400,
+html.light .text-slate-500 {
+  color: #475569 !important;
+}
+
+html.light .text-slate-600 {
+  color: #64748b !important;
+}
+
+html.light .border-line {
+  border-color: #cbd5e1 !important;
+}
+
+html.light .bg-surface {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+html.light .bg-surface-2 {
+  background-color: #f1f5f9 !important;
+}
+
+/* Ensure hero gradient is clean and readable in light mode */
+html.light .bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, #ffffff, #f8fafc, #f1f5f9) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Thin, theme-consistent scrollbars */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
