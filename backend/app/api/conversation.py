@@ -4,10 +4,11 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_session
+from ..models.user import User
 from ..schemas import AutopsyOut, ConversationStartRequest, TurnResponse
 from ..services.conversation_engine import conversation_engine
 from ..services.evaluation_engine import get_autopsy
-from ..services.users import get_or_create_default_user
+from ..services.auth_deps import get_current_user
 
 router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
@@ -15,10 +16,10 @@ router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 @router.post("/start", response_model=TurnResponse)
 async def start_conversation(
     body: ConversationStartRequest,
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> TurnResponse:
     """Create a conversation and return the AI's opening line (with audio URL)."""
-    user = await get_or_create_default_user(session)
     conv, opening, audio_url = await conversation_engine.start_conversation(
         session,
         user_id=user.id,

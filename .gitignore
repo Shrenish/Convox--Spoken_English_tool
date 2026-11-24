@@ -8,6 +8,8 @@ venv/
 # --- Config & secrets ---
 backend/.env
 *.db
+*.db-shm
+*.db-wal
 backend/audio/
 
 # --- Node / Next.js ---

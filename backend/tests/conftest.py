@@ -75,6 +75,11 @@ async def client(db_engine):
         async with maker() as s:
             yield s
 
+    async with maker() as bootstrap_s:
+        await sync_scenarios(bootstrap_s)
+        await get_or_create_default_user(bootstrap_s)
+        await bootstrap_s.commit()
+
     app.dependency_overrides[get_session] = override_get_session
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as c:

@@ -37,6 +37,14 @@ class LearnerProfile(Base):
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
+    country: Mapped[str | None] = mapped_column(String(100), default="India")
+    communication_context: Mapped[str] = mapped_column(
+        String(50), default="Everyday American English"
+    )
+    target_objective: Mapped[str] = mapped_column(
+        String(255), default="Communicate comfortably in common everyday situations."
+    )
+    cefr_provisional: Mapped[str] = mapped_column(String(30), default="B1 — Intermediate")
     # JSON: { fluency: 7.0, grammar: 7.0, ..., listening_response: 6.5, ... }
     skill_dims_json: Mapped[str] = mapped_column(default="{}")
     # JSON: dimension confidence/coverage { fluency: { sample_count: 3, confidence: "HIGH" }, ... }

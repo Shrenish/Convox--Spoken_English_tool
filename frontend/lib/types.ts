@@ -1,5 +1,17 @@
 // Typed mirror of the CONVOX backend API (FastAPI / Pydantic shapes).
 
+// --- Auth / User -----------------------------------------------------------------
+
+export interface UserOut {
+  id: string;
+  display_name: string;
+  email: string | null;
+  auth_provider: string;
+  country: string | null;
+  communication_context: string | null;
+  onboarding_completed: boolean;
+}
+
 export interface Health {
   status: string;
   version: string;

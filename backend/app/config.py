@@ -37,6 +37,14 @@ class Settings(BaseSettings):
     AUDIO_DIR: Path = BACKEND_DIR / "audio"
     MAX_AUDIO_BYTES: int = 10 * 1024 * 1024  # 10 MB safety cap on uploaded audio
 
+    # --- Security & Auth ---
+    JWT_SECRET: str = "convox-dev-secret-key-change-in-production-12345678"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:3000/auth/callback/google"
+
     # --- Conversation behaviour ---
     MAX_TURNS: int = 14                # hard cap to avoid runaway sessions
     TURN_TIMEOUT_SECONDS: int = 90     # websocket/user idle guard

@@ -157,11 +157,11 @@ class ConversationEngine:
             audio_path = None
 
         # Pure text mode: no audio to save.
-        turn_count = await self._turn_count(session, conv.id)
+        turn_count = len(conv.turns)
         maxed = turn_count >= settings.MAX_TURNS
 
-        # Persist the user turn.
-        seq_user = await self._next_sequence(session, conv.id)
+        # Persist the user turn using loaded turns length to ensure sequence consistency
+        seq_user = max([t.sequence for t in conv.turns] + [-1]) + 1
         session.add(
             Turn(
                 request_id=request_id,
@@ -191,7 +191,7 @@ class ConversationEngine:
         ai_reply, event, ai_done = await self._generate_ai_reply(session, conv, defn)
 
         # Persist the AI turn.
-        seq_ai = await self._next_sequence(session, conv.id)
+        seq_ai = seq_user + 1
         session.add(
             Turn(
                 conversation_id=conv.id,
@@ -376,12 +376,21 @@ class ConversationEngine:
         return int(res.scalar() or 0)
 
     async def _next_sequence(self, session: AsyncSession, conversation_id: str) -> int:
+        await session.flush()
+        # Check in-session objects first to include uncommitted turns
+        max_in_session = -1
+        for obj in session.new:
+            if isinstance(obj, Turn) and obj.conversation_id == conversation_id:
+                if obj.sequence > max_in_session:
+                    max_in_session = obj.sequence
+
         res = await session.execute(
             select(func.coalesce(func.max(Turn.sequence), -1)).where(
                 Turn.conversation_id == conversation_id
             )
         )
-        return int(res.scalar() or -1) + 1
+        db_max = int(res.scalar() or -1)
+        return max(max_in_session, db_max) + 1
 
 
 def _event_out(event: ScenarioEvent | None) -> dict | None:

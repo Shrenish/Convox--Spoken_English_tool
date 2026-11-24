@@ -17,7 +17,16 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    email: Mapped[str | None] = mapped_column(String(255), unique=True, index=True, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    auth_provider: Mapped[str] = mapped_column(String(30), default="local")  # local, google, guest
+    google_id: Mapped[str | None] = mapped_column(String(120), unique=True, index=True, nullable=True)
     display_name: Mapped[str] = mapped_column(String(120), default="Learner")
+    country: Mapped[str | None] = mapped_column(String(100), default="India")
+    communication_context: Mapped[str] = mapped_column(
+        String(50), default="Everyday American English"
+    )
+    onboarding_completed: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

@@ -87,6 +87,7 @@ async def health() -> dict:
 
 
 # Routers
+from .api import auth as auth_api  # noqa: E402
 from .api import conversation as conversation_api  # noqa: E402
 from .api import evaluation as evaluation_api  # noqa: E402
 from .api import profile as profile_api  # noqa: E402
@@ -94,6 +95,7 @@ from .api import scenario as scenario_api  # noqa: E402
 from .api import travel as travel_api  # noqa: E402
 
 for router in (
+    auth_api.router,
     conversation_api.router,
     scenario_api.router,
     evaluation_api.router,

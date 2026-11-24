@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database import async_session_factory
+from ..database import SessionLocal
 from ..models.evaluation_job import EvaluationJob
 from .evaluation_engine import evaluate_conversation
 from .learner_model import apply_evaluation
@@ -40,7 +40,7 @@ class EvaluationWorker:
 
     async def recover_stale_jobs(self) -> None:
         """On app start, recover jobs stuck in 'running' back to 'pending'."""
-        async with async_session_factory() as session:
+        async with SessionLocal() as session:
             stale_jobs = (
                 await session.scalars(
                     select(EvaluationJob).where(EvaluationJob.status == "running")
@@ -52,7 +52,7 @@ class EvaluationWorker:
 
     async def process_next_job(self) -> bool:
         """Claims and runs the next pending evaluation job."""
-        async with async_session_factory() as session:
+        async with SessionLocal() as session:
             job = await session.scalar(
                 select(EvaluationJob)
                 .where(EvaluationJob.status == "pending")
@@ -72,12 +72,12 @@ class EvaluationWorker:
 
         # Process outside of the claim transaction
         try:
-            async with async_session_factory() as run_session:
+            async with SessionLocal() as run_session:
                 await evaluate_conversation(run_session, conversation_id)
                 await apply_evaluation(run_session, conversation_id)
                 await run_session.commit()
 
-            async with async_session_factory() as finish_session:
+            async with SessionLocal() as finish_session:
                 current_job = await finish_session.get(EvaluationJob, job_id)
                 if current_job:
                     current_job.status = "completed"
@@ -87,7 +87,7 @@ class EvaluationWorker:
 
         except Exception as exc:
             logger.exception(f"Error processing evaluation job {job_id}: {exc}")
-            async with async_session_factory() as fail_session:
+            async with SessionLocal() as fail_session:
                 current_job = await fail_session.get(EvaluationJob, job_id)
                 if current_job:
                     if current_job.attempt_count >= current_job.max_attempts:

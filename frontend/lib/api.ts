@@ -33,6 +33,7 @@ export function resolveAudioUrl(
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const isForm = init?.body instanceof FormData;
   const res = await fetch(`${BACKEND_BASE}${path}`, {
+    credentials: "include",          // send HttpOnly auth cookie on every request
     ...init,
     headers: isForm ? undefined : { "Content-Type": "application/json", ...init?.headers },
   });

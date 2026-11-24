@@ -20,6 +20,12 @@ anthropic>=0.40.0                 # conversation + evaluation models
 openai>=1.55.0                    # TTS (audio.speech)
 httpx>=0.27.0                     # Groq Whisper STT (OpenAI-compatible endpoint)
 
+# --- Authentication & Security ---
+pyjwt>=2.8.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0.0
+pydantic[email]>=2.9.0            # EmailStr validation in auth router
+
 # --- Migrations (Phase 2; schema is pinned via Base.metadata in v1) ---
 alembic>=1.14.0
 
