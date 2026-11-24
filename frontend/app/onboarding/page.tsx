@@ -44,7 +44,7 @@ const COMM_CONTEXTS = [
 export default function OnboardingPage() {
   const { user, loading, refresh } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [country, setCountry] = useState("India");
   const [otherCountry, setOtherCountry] = useState("");
   const [commContext, setCommContext] = useState("International English");
@@ -63,13 +63,13 @@ export default function OnboardingPage() {
 
   const finalCountry = country === "Other" ? otherCountry.trim() || "Other" : country;
 
-  const handleFinish = async () => {
+  const handleSavePreferences = async () => {
     setError("");
     setSaving(true);
     try {
       await saveOnboarding(finalCountry, commContext);
       await refresh();
-      router.push("/dashboard");
+      setStep(3); // Go to trial assessment invitation step
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save preferences.");
     } finally {
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
     <div className="flex min-h-[80vh] flex-col items-center justify-center gap-8 py-12">
       {/* Progress indicator */}
       <div className="flex items-center gap-3">
-        {[1, 2].map((s) => (
+        {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center gap-2">
             <div
               className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors ${
@@ -92,7 +92,7 @@ export default function OnboardingPage() {
             >
               {step > s ? "✓" : s}
             </div>
-            {s < 2 && <div className="h-px w-8 bg-line" />}
+            {s < 3 && <div className="h-px w-8 bg-line" />}
           </div>
         ))}
       </div>
@@ -112,9 +112,16 @@ export default function OnboardingPage() {
             commContext={commContext}
             setCommContext={setCommContext}
             onBack={() => setStep(1)}
-            onFinish={handleFinish}
+            onFinish={handleSavePreferences}
             saving={saving}
             error={error}
+          />
+        )}
+        {step === 3 && (
+          <Step3TrialAssessment
+            commContext={commContext}
+            onStart={() => router.push("/conversation?scenario=introduce_classmate")}
+            onSkip={() => router.push("/dashboard")}
           />
         )}
       </div>
@@ -257,8 +264,55 @@ function Step2Context({
       )}
 
       <Button className="w-full" onClick={onFinish} disabled={saving}>
-        {saving ? <Spinner size="sm" /> : "Start learning →"}
+        {saving ? <Spinner size="sm" /> : "Save & Continue →"}
       </Button>
+    </div>
+  );
+}
+
+// ─── Step 3: Trial Speaking Assessment ────────────────────────────────────────
+
+function Step3TrialAssessment({
+  commContext,
+  onStart,
+  onSkip,
+}: {
+  commContext: string;
+  onStart: () => void;
+  onSkip: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-6 space-y-5">
+      <div className="text-center space-y-2">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-mint/30 bg-mint/10 px-3 py-1 text-xs text-mint font-medium">
+          Profile Ready
+        </div>
+        <h2 className="text-xl font-bold text-slate-100">Let's understand how you communicate</h2>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Take a short, natural trial conversation (3–4 minutes) with an AI partner.
+          This will establish your initial CORE baseline and personalized practice plan.
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-line/60 bg-surface-2/60 p-4 space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Trial Activity</p>
+        <p className="text-sm font-bold text-slate-200">Meet a New Classmate</p>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Introduce yourself, discuss your interests, and answer simple follow-up questions in {commContext}.
+        </p>
+      </div>
+
+      <div className="space-y-2.5">
+        <Button className="w-full" size="lg" onClick={onStart}>
+          Begin Initial Speaking Assessment →
+        </Button>
+        <button
+          onClick={onSkip}
+          className="w-full text-center text-xs text-slate-400 hover:text-slate-200 transition-colors py-1"
+        >
+          Skip to dashboard for now
+        </button>
+      </div>
     </div>
   );
 }
