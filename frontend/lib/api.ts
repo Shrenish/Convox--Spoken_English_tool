@@ -7,6 +7,7 @@
 import type {
   AutopsyOut,
   EvaluationOut,
+  GamificationState,
   Health,
   LearnerProfileOut,
   ProgressSummary,
@@ -128,3 +129,8 @@ export const completeStage = (journeyId: string, stageKey: string) =>
     `/api/travel/${journeyId}/stage/${stageKey}/complete`,
     { method: "POST" },
   );
+
+// --- gamification ----------------------------------------------------------------
+
+export const getGamificationStatus = () =>
+  http<GamificationState>("/api/gamification/status");

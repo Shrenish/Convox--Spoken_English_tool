@@ -93,6 +93,7 @@ from .api import evaluation as evaluation_api  # noqa: E402
 from .api import profile as profile_api  # noqa: E402
 from .api import scenario as scenario_api  # noqa: E402
 from .api import travel as travel_api  # noqa: E402
+from .api import gamification as gamification_api  # noqa: E402
 
 for router in (
     auth_api.router,
@@ -101,5 +102,6 @@ for router in (
     evaluation_api.router,
     profile_api.router,
     travel_api.router,
+    gamification_api.router,
 ):
     app.include_router(router)

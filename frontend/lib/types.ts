@@ -157,3 +157,41 @@ export interface TravelStageCompleteResponse {
   journey_completed: boolean;
   recommended_focus: string[];
 }
+
+// --- Gamification & Personas ----------------------------------------------------
+
+export interface AchievementBadge {
+  id: string;
+  title: string;
+  tier: "Bronze" | "Silver" | "Gold" | "Platinum";
+  category: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlocked_at?: string | null;
+  progress: number;
+}
+
+export interface ExecutivePersona {
+  id: string;
+  name: string;
+  title: string;
+  role: string;
+  avatar_color: string;
+  voice_description: string;
+  coaching_style: string;
+  unlocked: boolean;
+  requirement: string;
+  recommended_scenario: string;
+}
+
+export interface GamificationState {
+  xp: number;
+  executive_level: number;
+  title: string;
+  streak_days: number;
+  next_level_xp: number;
+  badges: AchievementBadge[];
+  personas: ExecutivePersona[];
+  recent_rewards: string[];
+}

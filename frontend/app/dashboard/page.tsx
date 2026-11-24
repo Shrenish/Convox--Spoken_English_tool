@@ -10,13 +10,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { getProgress, listScenarios, recommendScenario } from "@/lib/api";
-import type { ProgressSummary, ScenarioOut, ScenarioRecommendation } from "@/lib/types";
+import { getGamificationStatus, getProgress, listScenarios, recommendScenario } from "@/lib/api";
+import type { GamificationState, ProgressSummary, ScenarioOut, ScenarioRecommendation } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { SpeakingIllustration } from "@/components/illustrations/FeatureIllustrations";
+import { ExecutiveGamificationHub } from "@/components/gamification/ExecutiveGamificationHub";
 
 function stripMarkdown(text: string) {
   return text.replace(/\*\*/g, "");
@@ -29,6 +30,7 @@ export default function DashboardPage() {
   const [recommend, setRecommend] = useState<ScenarioRecommendation | null>(null);
   const [progress, setProgress] = useState<ProgressSummary | null>(null);
   const [scenarios, setScenarios] = useState<ScenarioOut[]>([]);
+  const [gamification, setGamification] = useState<GamificationState | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -46,14 +48,16 @@ export default function DashboardPage() {
     if (!user) return;
     (async () => {
       try {
-        const [rec, prog, list] = await Promise.all([
+        const [rec, prog, list, game] = await Promise.all([
           recommendScenario(),
           getProgress(),
           listScenarios(),
+          getGamificationStatus().catch(() => null),
         ]);
         setRecommend(rec);
         setProgress(prog);
         setScenarios(list.filter((s) => s.category === "core" && !s.stage_key).slice(0, 6));
+        setGamification(game);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Backend unreachable.");
       } finally {
@@ -219,6 +223,19 @@ export default function DashboardPage() {
         <div className="flex h-32 items-center justify-center">
           <Spinner label="Loading your data…" />
         </div>
+      )}
+
+      {/* Executive Gamification Hub & Persona Selection */}
+      {!dataLoading && gamification && (
+        <section className="pt-2">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+              Executive Career Milestones & Dynamic AI Personas
+            </h3>
+            <span className="text-xs text-accent-soft font-semibold">Gamified Professional Track</span>
+          </div>
+          <ExecutiveGamificationHub state={gamification} />
+        </section>
       )}
 
       {/* Focus areas */}
