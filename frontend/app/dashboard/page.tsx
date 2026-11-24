@@ -86,17 +86,21 @@ export default function DashboardPage() {
           Every session gives you evidence-based feedback, not just scores.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
+          <Link href="/assessment">
+            <Button size="lg" className="bg-gradient-to-r from-accent to-accent-soft hover:opacity-90">
+              Check English Proficiency →
+            </Button>
+          </Link>
           {recommend && (
             <Link href={`/conversation?scenario=${recommend.scenario_key}`}>
-              <Button size="lg">
-                Start today's session →{" "}
-                <span className="font-normal opacity-70 ml-1">{recommend.title}</span>
+              <Button size="lg" variant="secondary">
+                Practice → <span className="font-normal opacity-80 ml-1">{recommend.title}</span>
               </Button>
             </Link>
           )}
           <Link href="/travel">
             <Button size="lg" variant="secondary">
-              Global Survival journey
+              Global Survival Journey 🌍
             </Button>
           </Link>
         </div>

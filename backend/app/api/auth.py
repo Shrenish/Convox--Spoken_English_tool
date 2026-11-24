@@ -41,6 +41,7 @@ class UserOut(BaseModel):
     country: str | None
     communication_context: str | None
     onboarding_completed: bool
+    token: str | None = None
 
 
 def _set_auth_cookie(response: Response, token: str) -> None:
@@ -52,6 +53,7 @@ def _set_auth_cookie(response: Response, token: str) -> None:
         secure=False,  # Set to True when served over HTTPS in production
         max_age=60 * 60 * 24 * 7,  # 7 days
         path="/",
+        domain=None,
     )
 
 
@@ -82,6 +84,7 @@ async def register(
         country=user.country,
         communication_context=user.communication_context,
         onboarding_completed=user.onboarding_completed,
+        token=token,
     )
 
 
@@ -113,6 +116,7 @@ async def login(
         country=user.country,
         communication_context=user.communication_context,
         onboarding_completed=user.onboarding_completed,
+        token=token,
     )
 
 

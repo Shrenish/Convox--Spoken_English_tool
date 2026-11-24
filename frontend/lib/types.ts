@@ -10,6 +10,7 @@ export interface UserOut {
   country: string | null;
   communication_context: string | null;
   onboarding_completed: boolean;
+  token?: string | null;
 }
 
 export interface Health {

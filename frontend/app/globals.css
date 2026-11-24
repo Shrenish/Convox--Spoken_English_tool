@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-ink: #0b1020;
+  --bg-surface: #131a2e;
+  --bg-surface-2: #1b2440;
+  --border-line: #2a3557;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+html.light {
+  --bg-ink: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f1f5f9;
+  --border-line: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+}
+
 /* Thin, theme-consistent scrollbars for the transcript panes. */
 *::-webkit-scrollbar {
   width: 8px;

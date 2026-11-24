@@ -72,20 +72,56 @@ export default function WelcomePage() {
         )}
       </div>
 
-      {/* Features teaser */}
+      {/* Features teaser with visual cards */}
       {mode === "choose" && (
-        <div className="grid grid-cols-3 gap-6 text-center max-w-xl mt-2">
-          {[
-            { icon: "🎙️", label: "Voice conversations", sub: "Talk to AI partners" },
-            { icon: "📊", label: "CORE evaluation", sub: "14-dimension feedback" },
-            { icon: "🌍", label: "Global Survival", sub: "Real-world scenarios" },
-          ].map((f) => (
-            <div key={f.label} className="space-y-1">
-              <div className="text-2xl">{f.icon}</div>
-              <p className="text-xs font-semibold text-slate-200">{f.label}</p>
-              <p className="text-[11px] text-slate-500">{f.sub}</p>
+        <div className="w-full max-w-3xl mt-4 space-y-6">
+          <div className="text-center">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Everything CONVOX does at a glance
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent/15 text-accent-soft text-2xl">
+                🎙️
+              </div>
+              <p className="text-xs font-bold text-slate-100">Live Voice Practice</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Realistic turn-based spoken conversations with diverse AI personas.
+              </p>
             </div>
-          ))}
+
+            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-mint/15 text-mint text-2xl">
+                📊
+              </div>
+              <p className="text-xs font-bold text-slate-100">CORE 14 Evaluation</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Evidence-cited analysis quoting your actual words, not artificial scores.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-amber/15 text-amber text-2xl">
+                🌍
+              </div>
+              <p className="text-xs font-bold text-slate-100">Global Survival</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                8-stage international travel journey through airports, hotels, and emergencies.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-rose/15 text-rose text-2xl">
+                🎯
+              </div>
+              <p className="text-xs font-bold text-slate-100">Adaptive Trajectory</p>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Every completed session dynamically shapes your next targeted practice.
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

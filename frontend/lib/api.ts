@@ -32,10 +32,18 @@ export function resolveAudioUrl(
 
 async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const isForm = init?.body instanceof FormData;
+  const token = typeof window !== "undefined" ? localStorage.getItem("convox_token") : null;
+  const authHeaders: Record<string, string> = {};
+  if (token) {
+    authHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${BACKEND_BASE}${path}`, {
     credentials: "include",          // send HttpOnly auth cookie on every request
     ...init,
-    headers: isForm ? undefined : { "Content-Type": "application/json", ...init?.headers },
+    headers: isForm
+      ? { ...authHeaders, ...init?.headers }
+      : { "Content-Type": "application/json", ...authHeaders, ...init?.headers },
   });
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as {
