@@ -12,6 +12,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { login, register } from "@/lib/auth";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
+import {
+  SpeakingIllustration,
+  CoreEvaluationIllustration,
+  TravelJourneyIllustration,
+  AdaptiveLearningIllustration,
+} from "@/components/illustrations/FeatureIllustrations";
 
 type Mode = "choose" | "signin" | "register";
 
@@ -82,44 +88,44 @@ export default function WelcomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent/15 text-accent-soft text-2xl">
-                🎙️
+            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
+              <SpeakingIllustration className="w-20 h-20" />
+              <div>
+                <p className="text-xs font-bold text-slate-100">Live Voice Practice</p>
+                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
+                  Realistic turn-based spoken conversations with diverse AI personas.
+                </p>
               </div>
-              <p className="text-xs font-bold text-slate-100">Live Voice Practice</p>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Realistic turn-based spoken conversations with diverse AI personas.
-              </p>
             </div>
 
-            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-mint/15 text-mint text-2xl">
-                📊
+            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
+              <CoreEvaluationIllustration className="w-20 h-20" />
+              <div>
+                <p className="text-xs font-bold text-slate-100">CORE 14 Evaluation</p>
+                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
+                  Evidence-cited analysis quoting your actual words, not artificial scores.
+                </p>
               </div>
-              <p className="text-xs font-bold text-slate-100">CORE 14 Evaluation</p>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Evidence-cited analysis quoting your actual words, not artificial scores.
-              </p>
             </div>
 
-            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-amber/15 text-amber text-2xl">
-                🌍
+            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
+              <TravelJourneyIllustration className="w-20 h-20" />
+              <div>
+                <p className="text-xs font-bold text-slate-100">Global Survival</p>
+                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
+                  8-stage international travel journey through airports, hotels, and emergencies.
+                </p>
               </div>
-              <p className="text-xs font-bold text-slate-100">Global Survival</p>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                8-stage international travel journey through airports, hotels, and emergencies.
-              </p>
             </div>
 
-            <div className="rounded-2xl border border-line bg-surface p-4 text-center space-y-2 hover:border-accent/40 transition-all">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-rose/15 text-rose text-2xl">
-                🎯
+            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
+              <AdaptiveLearningIllustration className="w-20 h-20" />
+              <div>
+                <p className="text-xs font-bold text-slate-100">Adaptive Trajectory</p>
+                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
+                  Every completed session dynamically shapes your next targeted practice.
+                </p>
               </div>
-              <p className="text-xs font-bold text-slate-100">Adaptive Trajectory</p>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Every completed session dynamically shapes your next targeted practice.
-              </p>
             </div>
           </div>
         </div>

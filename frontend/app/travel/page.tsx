@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { JourneyMap } from "@/components/travel/JourneyMap";
+import { TravelJourneyIllustration } from "@/components/illustrations/FeatureIllustrations";
 
 const DEST = "UK";
 
@@ -113,20 +114,28 @@ export default function TravelPage() {
   if (!journey) {
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl border border-line bg-gradient-to-br from-surface to-surface-2 px-6 py-8">
-          <Badge tone="cool">Global Survival · 8 stages</Badge>
-          <h1 className="mt-3 text-2xl font-extrabold text-slate-100">Survive in English, step by step.</h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-400">
-            airport → immigration → transport → hotel → restaurant → shopping → social → the
-            unexpected problem. Each stage is a short, real conversation with controlled events,
-            scored by CORE and carried into your learner model.
-          </p>
-          <div className="mt-5 flex gap-3">
-            <Button onClick={() => void handleStartJourney()} size="lg" disabled={busy}>
-              {busy ? "Starting…" : `Start the ${DEST} journey →`}
-            </Button>
+        <div className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface to-surface-2 px-6 py-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-3">
+              <Badge tone="cool">Global Survival · 8 stages</Badge>
+              <h1 className="text-3xl font-extrabold text-slate-100">Survive in English, step by step.</h1>
+              <p className="max-w-xl text-sm leading-relaxed text-slate-400">
+                airport → immigration → transport → hotel → restaurant → shopping → social → the
+                unexpected problem. Each stage is a short, real conversation with controlled events,
+                scored by CORE and carried into your learner model.
+              </p>
+              <div className="mt-4 flex gap-3">
+                <Button onClick={() => void handleStartJourney()} size="lg" disabled={busy} className="shadow-lg shadow-amber/20">
+                  {busy ? "Starting…" : `Start the ${DEST} journey ✈️`}
+                </Button>
+              </div>
+              {error && <p className="mt-3 text-xs text-rose">{error}</p>}
+            </div>
+
+            <div className="hidden sm:flex items-center justify-center p-2">
+              <TravelJourneyIllustration className="w-36 h-36" />
+            </div>
           </div>
-          {error && <p className="mt-3 text-xs text-rose">{error}</p>}
         </div>
       </div>
     );

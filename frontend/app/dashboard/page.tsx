@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
+import { SpeakingIllustration } from "@/components/illustrations/FeatureIllustrations";
 
 function stripMarkdown(text: string) {
   return text.replace(/\*\*/g, "");
@@ -73,36 +74,44 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome header */}
-      <section className="rounded-3xl border border-line bg-gradient-to-br from-surface via-surface to-surface-2 px-6 py-8">
-        <Badge tone="cool">
-          {user.communication_context ?? "Communication simulator"}
-        </Badge>
-        <h1 className="mt-3 text-3xl font-extrabold leading-tight text-slate-50">
-          Welcome back, {user.display_name.split(" ")[0]}.
-        </h1>
-        <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-400">
-          Continue building your confidence through realistic conversations.
-          Every session gives you evidence-based feedback, not just scores.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link href="/assessment">
-            <Button size="lg" className="bg-gradient-to-r from-accent to-accent-soft hover:opacity-90">
-              Check English Proficiency →
-            </Button>
-          </Link>
-          {recommend && (
-            <Link href={`/conversation?scenario=${recommend.scenario_key}`}>
-              <Button size="lg" variant="secondary">
-                Practice → <span className="font-normal opacity-80 ml-1">{recommend.title}</span>
-              </Button>
-            </Link>
-          )}
-          <Link href="/travel">
-            <Button size="lg" variant="secondary">
-              Global Survival Journey 🌍
-            </Button>
-          </Link>
+      {/* Welcome header with visual graphic */}
+      <section className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface via-surface to-surface-2 px-6 py-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-3">
+            <Badge tone="cool">
+              {user.communication_context ?? "Communication simulator"}
+            </Badge>
+            <h1 className="text-3xl font-extrabold leading-tight text-slate-50">
+              Welcome back, {user.display_name.split(" ")[0]}.
+            </h1>
+            <p className="max-w-xl text-sm leading-relaxed text-slate-400">
+              Continue building your confidence through realistic conversations.
+              Every session gives you evidence-based feedback, not just scores.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href="/assessment">
+                <Button size="lg" className="bg-gradient-to-r from-accent to-accent-soft text-white hover:opacity-95 shadow-md shadow-accent/20">
+                  🎯 Check English Proficiency
+                </Button>
+              </Link>
+              {recommend && (
+                <Link href={`/conversation?scenario=${recommend.scenario_key}`}>
+                  <Button size="lg" variant="secondary">
+                    🎙️ Practice → <span className="font-normal opacity-80 ml-1">{recommend.title}</span>
+                  </Button>
+                </Link>
+              )}
+              <Link href="/travel">
+                <Button size="lg" variant="secondary">
+                  🌍 Global Survival
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center justify-center p-2">
+            <SpeakingIllustration className="w-36 h-36 drop-shadow-md" />
+          </div>
         </div>
       </section>
 
