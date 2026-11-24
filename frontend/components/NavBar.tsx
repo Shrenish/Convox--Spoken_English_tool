@@ -26,19 +26,20 @@ export function NavBar() {
   const isLandingPage = pathname === "/" && !user;
 
   return (
-    <header className="flex items-center justify-between py-5 border-b border-line/40 mb-6">
+    <header className="flex items-center justify-between py-5 border-b border-line/40 mb-6 sticky top-0 z-30 backdrop-blur-md"
+      style={{ backgroundColor: "var(--header-bg)" }}>
       <Link
         href={user ? "/dashboard" : "/"}
-        className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight text-slate-100 group"
+        className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight group"
       >
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-accent to-accent-soft text-ink shadow-md shadow-accent/25 transition-transform group-hover:scale-105">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-accent to-accent-soft text-white shadow-md shadow-accent/30 transition-transform group-hover:scale-105">
           <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12v4c0 1.66 1.34 3 3 3h1v-7H4v-2c0-4.41 3.59-8 8-8s8 3.59 8 8v2h-2v7h1c1.66 0 3-1.34 3-3v-4c0-5.52-4.48-10-10-10zm-5 13H5v-4h2v4zm12 0h-2v-4h2v4z"/>
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="font-black leading-none tracking-wider text-slate-100">CONVOX</span>
-          <span className="text-[9px] font-medium tracking-widest text-accent-soft uppercase">Speak · Learn · Conquer</span>
+          <span className="font-black leading-none tracking-wider" style={{ color: "var(--text-main)" }}>CONVOX</span>
+          <span className="text-[9px] font-semibold tracking-widest text-accent-soft uppercase">Speak · Learn · Conquer</span>
         </div>
       </Link>
 
@@ -51,9 +52,10 @@ export function NavBar() {
                 href={item.href}
                 className={`rounded-lg px-3 py-1.5 font-medium transition-all ${
                   pathname === item.href
-                    ? "bg-surface-2 text-accent-soft shadow-sm border border-line"
-                    : "text-slate-400 hover:text-slate-100 hover:bg-surface-2/60"
+                    ? "bg-accent/15 text-accent-soft shadow-sm border border-accent/25"
+                    : "hover:bg-surface-2/80 hover:text-accent-soft"
                 }`}
+                style={{ color: pathname === item.href ? undefined : "var(--text-muted)" }}
               >
                 {item.label}
               </Link>

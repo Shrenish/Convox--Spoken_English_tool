@@ -50,25 +50,29 @@ export default function WelcomePage() {
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center gap-10 py-12">
       {/* Hero */}
-      <div className="text-center space-y-4 max-w-xl">
-        <div className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-2 px-4 py-1.5 text-xs font-medium text-slate-400 uppercase tracking-widest">
+      <div className="text-center space-y-4 max-w-xl animate-fade-in-up">
+        <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/8 px-4 py-1.5 text-xs font-semibold text-accent-soft uppercase tracking-widest">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+          </span>
           Voice-first communication learning
         </div>
-        <h1 className="text-5xl font-extrabold leading-tight tracking-tight text-slate-50">
+        <h1 className="text-6xl font-black leading-none tracking-tighter text-slate-50">
           CONVOX
         </h1>
-        <p className="text-lg font-semibold text-accent-soft">
+        <p className="text-xl font-bold text-accent-soft">
           Speak. Learn. Conquer.
         </p>
         <p className="text-sm leading-relaxed text-slate-400 max-w-md mx-auto">
-          Build your confidence through realistic conversations, understand your
-          communication mistakes and develop the skills to communicate
-          effectively in real-world situations.
+          Build real-world communication confidence through AI conversations,
+          evidence-based CORE evaluation, and an adaptive learning journey
+          designed around your unique voice.
         </p>
       </div>
 
       {/* Auth panel */}
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm animate-fade-in-up delay-200">
         {mode === "choose" && <ChooseMode onMode={setMode} />}
         {mode === "signin" && (
           <SignInForm onBack={() => setMode("choose")} onSuccess={refresh} />
@@ -78,55 +82,73 @@ export default function WelcomePage() {
         )}
       </div>
 
-      {/* Features teaser with visual cards */}
+      {/* Features teaser with animated visual cards */}
       {mode === "choose" && (
-        <div className="w-full max-w-3xl mt-4 space-y-6">
+        <div className="w-full max-w-3xl mt-4 space-y-5 animate-fade-in-up delay-400">
           <div className="text-center">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Everything CONVOX does at a glance
+            <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+              Everything CONVOX does — at a glance
             </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
-              <SpeakingIllustration className="w-20 h-20" />
-              <div>
-                <p className="text-xs font-bold text-slate-100">Live Voice Practice</p>
-                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
-                  Realistic turn-based spoken conversations with diverse AI personas.
-                </p>
+            {[
+              {
+                il: <SpeakingIllustration className="w-24 h-24" />,
+                title: "Live Voice Practice",
+                desc: "Turn-based spoken conversations with diverse AI personas.",
+                accent: "accent",
+                delay: "delay-100",
+              },
+              {
+                il: <CoreEvaluationIllustration className="w-24 h-24" />,
+                title: "CORE 14 Evaluation",
+                desc: "Evidence-cited analysis quoting your actual words.",
+                accent: "mint",
+                delay: "delay-200",
+              },
+              {
+                il: <TravelJourneyIllustration className="w-24 h-24" />,
+                title: "Global Survival",
+                desc: "8-stage travel journey through airports, hotels & emergencies.",
+                accent: "amber",
+                delay: "delay-300",
+              },
+              {
+                il: <AdaptiveLearningIllustration className="w-24 h-24" />,
+                title: "Adaptive Trajectory",
+                desc: "Every session shapes your next targeted practice.",
+                accent: "rose",
+                delay: "delay-400",
+              },
+            ].map(({ il, title, desc, delay }) => (
+              <div
+                key={title}
+                className={`card-hover animate-fade-in-up ${delay} rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/50 flex flex-col items-center cursor-default`}
+              >
+                <div className="relative">
+                  {il}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-100">{title}</p>
+                  <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{desc}</p>
+                </div>
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
-              <CoreEvaluationIllustration className="w-20 h-20" />
-              <div>
-                <p className="text-xs font-bold text-slate-100">CORE 14 Evaluation</p>
-                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
-                  Evidence-cited analysis quoting your actual words, not artificial scores.
-                </p>
+          {/* Quick stat row */}
+          <div className="grid grid-cols-3 gap-3 pt-2">
+            {[
+              { val: "14", label: "CORE Dimensions" },
+              { val: "8", label: "Journey Stages" },
+              { val: "∞", label: "AI Personas" },
+            ].map(({ val, label }) => (
+              <div key={label} className="rounded-xl border border-line bg-surface-2 py-3 text-center">
+                <p className="text-xl font-black text-accent">{val}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{label}</p>
               </div>
-            </div>
-
-            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
-              <TravelJourneyIllustration className="w-20 h-20" />
-              <div>
-                <p className="text-xs font-bold text-slate-100">Global Survival</p>
-                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
-                  8-stage international travel journey through airports, hotels, and emergencies.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-line bg-surface p-5 text-center space-y-3 hover:border-accent/40 transition-all flex flex-col items-center">
-              <AdaptiveLearningIllustration className="w-20 h-20" />
-              <div>
-                <p className="text-xs font-bold text-slate-100">Adaptive Trajectory</p>
-                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
-                  Every completed session dynamically shapes your next targeted practice.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       )}

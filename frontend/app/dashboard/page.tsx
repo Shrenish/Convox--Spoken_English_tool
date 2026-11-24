@@ -72,16 +72,32 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
+  // Learning workflow steps
+  const workflowSteps = [
+    { id: 0, icon: "🎯", label: "Baseline", sub: "Take the proficiency test" },
+    { id: 1, icon: "🎙️", label: "Practice", sub: "AI conversation sessions" },
+    { id: 2, icon: "📊", label: "Evaluate", sub: "CORE 14 analysis" },
+    { id: 3, icon: "🚀", label: "Improve", sub: "Track your growth" },
+  ];
+  const sessionsCompleted = progress?.sessions_completed ?? 0;
+  const currentStep = progress?.readiness == null ? 0 : sessionsCompleted === 0 ? 1 : sessionsCompleted < 3 ? 2 : 3;
+
   return (
-    <div className="space-y-6">
-      {/* Welcome header with visual graphic */}
+    <div className="space-y-6 animate-fade-in">
+      {/* Welcome hero */}
       <section className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface via-surface to-surface-2 px-6 py-8">
+        {/* Decorative background glow */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-accent opacity-[0.04] blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-mint opacity-[0.04] blur-2xl" />
+        </div>
+
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-3">
             <Badge tone="cool">
               {user.communication_context ?? "Communication simulator"}
             </Badge>
-            <h1 className="text-3xl font-extrabold leading-tight text-slate-50">
+            <h1 className="text-3xl font-extrabold leading-tight text-slate-50 animate-fade-in-up">
               Welcome back, {user.display_name.split(" ")[0]}.
             </h1>
             <p className="max-w-xl text-sm leading-relaxed text-slate-400">
@@ -90,7 +106,7 @@ export default function DashboardPage() {
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link href="/assessment">
-                <Button size="lg" className="bg-gradient-to-r from-accent to-accent-soft text-white hover:opacity-95 shadow-md shadow-accent/20">
+                <Button size="lg" className="bg-gradient-to-r from-accent to-accent-soft text-white hover:opacity-95 shadow-md shadow-accent/20 animate-glow-pulse">
                   🎯 Check English Proficiency
                 </Button>
               </Link>
@@ -111,6 +127,33 @@ export default function DashboardPage() {
 
           <div className="hidden lg:flex items-center justify-center p-2">
             <SpeakingIllustration className="w-36 h-36 drop-shadow-md" />
+          </div>
+        </div>
+
+        {/* Learning Workflow Step Tracker */}
+        <div className="mt-7 pt-6 border-t border-line/40">
+          <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-4 font-semibold">Your learning journey</p>
+          <div className="flex items-center gap-0">
+            {workflowSteps.map((step, i) => (
+              <div key={step.id} className="flex items-center flex-1 min-w-0">
+                <div className={`flex flex-col items-center flex-1 min-w-0 ${i <= currentStep ? "opacity-100" : "opacity-35"}`}>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-lg transition-all ${
+                    i < currentStep ? "border-mint bg-mint/15 shadow-md shadow-mint/20" :
+                    i === currentStep ? "border-accent bg-accent/15 shadow-md shadow-accent/25 animate-glow-pulse" :
+                    "border-line bg-surface-2"
+                  }`}>
+                    {i < currentStep ? "✓" : step.icon}
+                  </div>
+                  <p className={`mt-1.5 text-[10px] font-semibold text-center leading-tight ${
+                    i === currentStep ? "text-accent-soft" : i < currentStep ? "text-mint" : "text-slate-500"
+                  }`}>{step.label}</p>
+                  <p className="text-[9px] text-slate-600 text-center leading-tight hidden sm:block">{step.sub}</p>
+                </div>
+                {i < workflowSteps.length - 1 && (
+                  <div className={`h-0.5 flex-1 mx-2 rounded transition-all ${i < currentStep ? "bg-mint/50" : "bg-line/40"}`} />
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
