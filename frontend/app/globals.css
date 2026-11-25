@@ -6,14 +6,14 @@
  * Dynamic Theme CSS Variables
  * ----------------------------------------------------------- */
 :root {
-  --bg-ink: #0b1020;
-  --bg-surface: #131a2e;
-  --bg-surface-2: #1b2440;
-  --border-line: #2a3557;
+  --bg-ink: #050507;
+  --bg-surface: #0c0c10;
+  --bg-surface-2: #14141b;
+  --border-line: #272734;
   --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
-  --header-bg: rgba(11, 16, 32, 0.85);
+  --text-muted: #9ca3af;
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  --header-bg: rgba(5, 5, 7, 0.9);
 }
 
 html.light {
@@ -34,6 +34,14 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
+/* Ensure black text on acid lime backgrounds */
+.bg-\[\#a3e635\],
+.bg-\[\#bef264\],
+.bg-accent,
+.bg-accent-soft {
+  color: #000000 !important;
+}
+
 /* -------------------------------------------------------------
  * Light Mode Comprehensive Polish
  * ----------------------------------------------------------- */
@@ -48,8 +56,45 @@ html.light h3,
 html.light h4,
 html.light .text-slate-50,
 html.light .text-slate-100,
-html.light .text-slate-200 {
+html.light .text-slate-200,
+html.light .text-white,
+html.light .text-\[\#e1e2ec\],
+html.light .text-\[\#f8fafc\],
+html.light .text-\[\#c7c4d7\] {
   color: #0f172a !important;
+}
+
+/* Keep white text inside solid accent/pink/blue buttons */
+html.light .bg-\[\#2f2ebe\] .text-white,
+html.light .bg-\[\#2f2ebe\],
+html.light .bg-\[\#ec4899\],
+html.light .bg-accent {
+  color: #ffffff !important;
+}
+html.light .bg-\[\#a3e635\] {
+  color: #0f172a !important;
+}
+
+/* Light mode overrides for Arena & Mentor dark hex surfaces */
+html.light .bg-\[\#050507\],
+html.light .bg-\[\#0c0c10\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+html.light .bg-\[\#14141b\],
+html.light .bg-\[\#191b23\],
+html.light .bg-\[\#1d1f27\],
+html.light .bg-\[\#272a32\] {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+html.light .border-\[\#272734\] {
+  border-color: #cbd5e1 !important;
+}
+html.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
 }
 
 html.light .text-slate-300 {

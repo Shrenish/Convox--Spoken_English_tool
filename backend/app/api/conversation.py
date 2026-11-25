@@ -13,6 +13,15 @@ from ..services.auth_deps import get_current_user
 router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
 
+async def _verify_owner(session: AsyncSession, conversation_id: str, user_id: str) -> None:
+    from ..models.conversation import Conversation
+    from ..services.users import DEFAULT_USER_ID
+
+    conv = await session.get(Conversation, conversation_id)
+    if conv and conv.user_id not in (user_id, DEFAULT_USER_ID):
+        raise HTTPException(status_code=403, detail="Forbidden: you do not own this conversation")
+
+
 @router.post("/start", response_model=TurnResponse)
 async def start_conversation(
     body: ConversationStartRequest,
@@ -39,6 +48,7 @@ async def start_conversation(
 @router.post("/{conversation_id}/turn", response_model=TurnResponse)
 async def process_turn(
     conversation_id: str,
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     audio: UploadFile | None = File(None, description="User audio (wav/ogg/webm/mp3)"),
     transcript: str | None = Form(None, description="Optional: skip STT, use text"),
@@ -46,6 +56,7 @@ async def process_turn(
 ) -> TurnResponse:
     """One user turn. Audio is transcribed (Groq Whisper), the AI replies, the
     reply is synthesized (OpenAI TTS) and every turn is persisted."""
+    await _verify_owner(session, conversation_id, user.id)
     from ..config import settings
     from ..utils.audio import is_allowed_audio
 
@@ -94,9 +105,11 @@ async def process_turn(
 @router.post("/{conversation_id}/end")
 async def end_conversation(
     conversation_id: str,
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
     """Mark a conversation complete. Evaluation runs lazily on the autopsy read."""
+    await _verify_owner(session, conversation_id, user.id)
     await conversation_engine.end_conversation(session, conversation_id)
     await session.commit()
     return {
@@ -109,8 +122,10 @@ async def end_conversation(
 @router.get("/{conversation_id}/turns")
 async def list_turns(
     conversation_id: str,
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> list[dict]:
+    await _verify_owner(session, conversation_id, user.id)
     return await conversation_engine.list_turns(session, conversation_id)
 
 
@@ -140,9 +155,11 @@ async def get_evaluation_status(
 @router.get("/{conversation_id}/autopsy", response_model=AutopsyOut)
 async def conversation_autopsy(
     conversation_id: str,
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> AutopsyOut:
     """Full CORE autopsy: dimension scores, quoted evidence, event resolutions."""
+    await _verify_owner(session, conversation_id, user.id)
     result = await get_autopsy(session, conversation_id)
     await session.commit()
     return result

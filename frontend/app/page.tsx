@@ -165,8 +165,8 @@ function ChooseMode({ onMode }: { onMode: (m: Mode) => void }) {
         Get started
       </h2>
 
-      {/* Google OAuth — shown but disabled until NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED=true */}
-      <GoogleButton />
+      {/* Google OAuth */}
+      <GoogleButton onFallback={() => onMode("signin")} />
 
       <div className="relative flex items-center gap-3">
         <div className="flex-1 border-t border-line" />
@@ -193,29 +193,32 @@ function ChooseMode({ onMode }: { onMode: (m: Mode) => void }) {
 
 // ─── Google OAuth placeholder ─────────────────────────────────────────────────
 
-function GoogleButton() {
+function GoogleButton({ onFallback }: { onFallback: () => void }) {
   const isEnabled = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED === "true";
 
   if (!isEnabled) {
     return (
       <div className="relative">
         <button
-          disabled
-          className="w-full flex items-center justify-center gap-3 rounded-xl border border-line bg-surface-2/50 px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed"
+          type="button"
+          onClick={onFallback}
+          className="w-full flex items-center justify-center gap-3 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-sm text-slate-200 hover:border-accent/50 hover:bg-surface-2/80 transition-colors"
         >
           <GoogleIcon />
-          Continue with Google
+          Continue with Google (Use Email Sign-In)
         </button>
-        <p className="mt-1.5 text-center text-[10px] text-slate-600">
-          Google sign-in requires GOOGLE_CLIENT_ID configuration
+        <p className="mt-1.5 text-center text-[10px] text-slate-500">
+          Google OAuth is not configured in local dev — click above to sign in with email
         </p>
       </div>
     );
   }
 
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+
   return (
     <a
-      href="/api/auth/google"
+      href={`${apiBase}/api/auth/google`}
       className="w-full flex items-center justify-center gap-3 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-sm text-slate-200 hover:bg-surface-2/80 transition-colors"
     >
       <GoogleIcon />

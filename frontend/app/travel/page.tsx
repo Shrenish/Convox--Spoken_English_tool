@@ -1,22 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { completeStage, getTravel, startStage, startTravel } from "@/lib/api";
-import type { TravelJourneyOut, TravelStageCompleteResponse, TravelStageOut } from "@/lib/types";
+import type { TravelJourneyOut } from "@/lib/types";
 import { ConversationView } from "@/components/conversation/ConversationView";
-import { Card, CardHeader } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Spinner } from "@/components/ui/Spinner";
-import { JourneyMap } from "@/components/travel/JourneyMap";
 import { TravelJourneyIllustration } from "@/components/illustrations/FeatureIllustrations";
+import { TRAVEL_THEMES, type TravelTheme } from "@/components/travel/travelScenariosData";
 
 const DEST = "UK";
 
 export default function TravelPage() {
   const [journey, setJourney] = useState<TravelJourneyOut | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState<TravelTheme | null>(null);
   const [stageBusy, setStageBusy] = useState<string | null>(null);
   const [active, setActive] = useState<{
     stage_key: string;
@@ -25,8 +21,6 @@ export default function TravelPage() {
     title: string;
   } | null>(null);
   const [error, setError] = useState("");
-  const [completeInfo, setCompleteInfo] = useState<TravelStageCompleteResponse | null>(null);
-  const [lastConversationId, setLastConversationId] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = typeof window !== "undefined" ? window.localStorage.getItem("convox-journey-id") : null;
@@ -37,191 +31,177 @@ export default function TravelPage() {
     }
   }, []);
 
-  const refresh = async (id: string) => {
-    const fresh = await getTravel(id);
-    setJourney(fresh);
-  };
-
-  const handleStartJourney = async () => {
-    setBusy(true);
+  const handlePickConversation = async (stageKey: string, convTitle: string, convId: string) => {
+    setStageBusy(convId);
     setError("");
     try {
-      const created = await startTravel(DEST);
-      window.localStorage.setItem("convox-journey-id", created.journey_id);
-      setJourney(created);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start the journey.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleNewJourney = () => {
-    window.localStorage.removeItem("convox-journey-id");
-    setJourney(null);
-    setActive(null);
-    setCompleteInfo(null);
-  };
-
-  const handleStartStage = async (stageKey: string) => {
-    if (!journey) return;
-    setStageBusy(stageKey);
-    setError("");
-    setCompleteInfo(null);
-    try {
-      const start = await startStage(journey.journey_id, stageKey);
+      let currentJourney = journey;
+      if (!currentJourney) {
+        currentJourney = await startTravel(DEST);
+        window.localStorage.setItem("convox-journey-id", currentJourney.journey_id);
+        setJourney(currentJourney);
+      }
+      const start = await startStage(currentJourney.journey_id, stageKey);
       setActive({
         stage_key: start.stage_key,
         conversation_id: start.conversation_id,
         scenario_key: start.scenario_key,
-        title: start.title,
+        title: convTitle,
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start the stage.");
+      setError(e instanceof Error ? e.message : "Could not start the conversation.");
     } finally {
       setStageBusy(null);
     }
   };
 
-  const handleStageComplete = async (conversationId: string) => {
+  const handleStageComplete = async () => {
     if (!journey || !active) return;
-    setLastConversationId(conversationId);
     setActive(null);
     try {
-      const result = await completeStage(journey.journey_id, active.stage_key);
-      setCompleteInfo(result);
-      await refresh(journey.journey_id);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Stage completion failed.");
+      await completeStage(journey.journey_id, active.stage_key);
+      const fresh = await getTravel(journey.journey_id);
+      setJourney(fresh);
+    } catch {
+      // ignore
     }
   };
 
-  // Inline conversation has exclusive focus.
   if (active && journey) {
     return (
-      <div className="flex h-[74vh] flex-col overflow-hidden rounded-2xl border border-line bg-surface">
+      <div className="flex h-[78vh] flex-col overflow-hidden rounded-2xl border border-line bg-surface">
         <ConversationView
           key={active.conversation_id}
           conversationId={active.conversation_id}
+          scenarioKey={active.scenario_key}
           mode="travel"
           title={`${active.title} · Travel`}
-          onFinished={handleStageComplete}
+          onFinished={() => void handleStageComplete()}
         />
       </div>
     );
   }
 
-  if (!journey) {
+  if (selectedTheme) {
     return (
       <div className="space-y-6">
-        <div className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface to-surface-2 px-6 py-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div className="space-y-3">
-              <Badge tone="cool">Global Survival · 8 stages</Badge>
-              <h1 className="text-3xl font-extrabold text-slate-100">Survive in English, step by step.</h1>
-              <p className="max-w-xl text-sm leading-relaxed text-slate-400">
-                airport → immigration → transport → hotel → restaurant → shopping → social → the
-                unexpected problem. Each stage is a short, real conversation with controlled events,
-                scored by CORE and carried into your learner model.
-              </p>
-              <div className="mt-4 flex gap-3">
-                <Button onClick={() => void handleStartJourney()} size="lg" disabled={busy} className="shadow-lg shadow-amber/20">
-                  {busy ? "Starting…" : `Start the ${DEST} journey ✈️`}
-                </Button>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-6 py-5">
+          <div className="flex items-center gap-4">
+            <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/30 text-4xl">
+              {selectedTheme.icon}
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-[#a3e635] px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase text-black">
+                  {selectedTheme.badge}
+                </span>
+                <span className="font-mono text-xs text-slate-400">
+                  {selectedTheme.conversations.length} Conversations Ready
+                </span>
               </div>
-              {error && <p className="mt-3 text-xs text-rose">{error}</p>}
+              <h1 className="mt-1 text-2xl font-extrabold text-white">{selectedTheme.title}</h1>
+              <p className="text-xs text-slate-400">{selectedTheme.desc}</p>
             </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSelectedTheme(null)}
+            className="rounded-xl border border-line bg-surface-2 px-4 py-2 text-xs font-bold text-slate-200 transition hover:border-[#a3e635]/50 hover:text-white"
+          >
+            ← All 8 Travel Themes
+          </button>
+        </div>
 
-            <div className="hidden sm:flex items-center justify-center p-2">
-              <TravelJourneyIllustration className="w-36 h-36" />
-            </div>
+        {error && (
+          <div className="rounded-xl border border-rose/30 bg-rose/10 px-4 py-3 text-xs text-rose">
+            {error}
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {selectedTheme.conversations.map((c, idx) => {
+            const isBusy = stageBusy === c.id;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => void handlePickConversation(selectedTheme.stageKey, c.title, c.id)}
+                disabled={stageBusy !== null}
+                className="group flex flex-col justify-between rounded-2xl border border-line bg-surface p-4 text-left transition hover:-translate-y-0.5 hover:border-[#a3e635]/60 hover:shadow-lg disabled:opacity-60"
+              >
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <span className="font-mono text-[11px] font-bold text-slate-500">
+                      #{String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <span className="rounded-full bg-[#a3e635] px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase text-black">
+                      {c.status}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-white group-hover:text-[#a3e635]">
+                    {c.title}
+                  </h3>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-400">{c.desc}</p>
+                </div>
+                <span className="mt-3 inline-block font-mono text-[11px] font-semibold text-[#4ade80]">
+                  {isBusy ? "Starting conversation…" : "Start Conversation →"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="relative overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-surface to-surface-2 px-6 py-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-3">
+            <Badge tone="cool">Travel Scenes · 8 Themes · 120 Conversations</Badge>
+            <h1 className="text-3xl font-extrabold text-slate-100">Choose Your Travel Scene</h1>
+            <p className="max-w-xl text-sm leading-relaxed text-slate-400">
+              Click any travel theme box below to explore 15 unique, ready-to-practice conversations
+              for that exact setting.
+            </p>
+            {error && <p className="mt-3 text-xs text-rose">{error}</p>}
+          </div>
+
+          <div className="hidden sm:flex items-center justify-center p-2">
+            <TravelJourneyIllustration className="w-36 h-36" />
           </div>
         </div>
       </div>
-    );
-  }
 
-  const completed = journey.stages.filter((s) => s.status === "completed").length;
-  const activeStage = journey.stages.find((s) => s.status === "active") as TravelStageOut | undefined;
-  const isDone = journey.status === "completed";
-
-  return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-slate-100">Global Survival</h1>
-          <p className="text-xs text-slate-400">
-            {completed}/{journey.stages.length} stages · destination {journey.destination}
-            {activeStage ? ` · next: ${activeStage.title}` : ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {isDone ? (
-            <Button size="sm" variant="secondary" onClick={handleNewJourney}>Travel again</Button>
-          ) : (
-            <Button size="sm" variant="ghost" onClick={handleNewJourney}>Start over</Button>
-          )}
-        </div>
-      </div>
-
-      {isDone && (
-        <Card className="border-mint/30 bg-mint/10 p-5 text-center">
-          <p className="text-sm font-semibold text-mint">Journey complete — you made it through.</p>
-          <p className="mt-1 text-xs text-slate-400">Every stage has a CORE autopsy waiting in your history.</p>
-        </Card>
-      )}
-
-      {completeInfo && (
-        <Card className="border-accent/40 bg-accent/10 p-4">
-          <p className="text-sm font-semibold text-slate-100">
-            {completeInfo.stage_key} — stage complete
-          </p>
-          {completeInfo.next_stage ? (
-            <p className="mt-1 text-xs text-slate-400">
-              Next up: {completeInfo.next_stage.title} · score carried into your profile.
-              Tap Start when ready.
-            </p>
-          ) : (
-            <p className="mt-1 text-xs text-mint">All stages cleared. See your autopsies in Progress.</p>
-          )}
-          {completeInfo.recommended_focus.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {completeInfo.recommended_focus.map((d: string) => (
-                <Badge key={d} tone="cool">{d.replace(/_/g, " ")}</Badge>
-              ))}
+      {/* 8 Cartoonish Travel Scene Category Boxes */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {TRAVEL_THEMES.map((s) => (
+          <button
+            key={s.key}
+            type="button"
+            onClick={() => setSelectedTheme(s)}
+            className={`group flex flex-col justify-between rounded-2xl border ${s.border} bg-gradient-to-br ${s.bg} p-4 text-left transition hover:-translate-y-1 hover:shadow-xl`}
+          >
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <span className="rounded-full bg-[#a3e635] px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-black">
+                  {s.badge}
+                </span>
+                <span className="text-lg tracking-widest">{s.emojis}</span>
+              </div>
+              <div className="mb-3 flex h-20 items-center justify-center rounded-xl border border-white/10 bg-black/30 text-5xl transition-transform group-hover:scale-105">
+                {s.icon}
+              </div>
+              <h3 className="text-sm font-extrabold text-white">{s.title}</h3>
+              <p className="mt-1 text-xs leading-relaxed text-slate-400">{s.desc}</p>
             </div>
-          )}
-          {lastConversationId && (
-            <Link href={`/autopsy/${lastConversationId}`} className="mt-3 inline-block">
-              <Button size="sm" variant="secondary">Open the autopsy</Button>
-            </Link>
-          )}
-        </Card>
-      )}
-
-      {error && (
-        <p className="rounded-xl border border-rose/30 bg-rose/10 px-4 py-2 text-xs text-rose">{error}</p>
-      )}
-
-      <Card>
-        <CardHeader
-          title={`Mission control · ${Math.round((completed / journey.stages.length) * 100)}%`}
-          subtitle={`Hold-to-talk on each active stage. Text input works if the mic is missing.`}
-        />
-        <div className="px-5 py-4">
-          <JourneyMap stages={journey.stages} onStart={handleStartStage} busyKey={stageBusy} />
-        </div>
-      </Card>
-
-      <p className="text-center text-[11px] text-slate-500">
-        Need the mic elsewhere? <Link href="/conversation" className="text-accent-soft underline">Practice a regular session</Link>.
-      </p>
-
-      {busy && (
-        <div className="flex justify-center">
-          <Spinner label="Setting up…" />
-        </div>
-      )}
+            <span className="mt-3 inline-block font-mono text-[11px] font-semibold text-[#a3e635]">
+              Explore 15 Scenarios →
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

@@ -4,10 +4,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_session
+from ..models.user import User
 from ..schemas import EvaluationOut, ProgressSummary
+from ..services.auth_deps import get_current_user
 from ..services.evaluation_engine import evaluate_conversation
 from ..services.learner_model import get_progress_summary
-from ..services.users import DEFAULT_USER_ID, get_or_create_default_user
 
 router = APIRouter(prefix="/api", tags=["evaluation"])
 
@@ -15,9 +16,18 @@ router = APIRouter(prefix="/api", tags=["evaluation"])
 @router.get("/evaluation/{conversation_id}", response_model=EvaluationOut)
 async def get_evaluation(
     conversation_id: str,
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> EvaluationOut:
     """CORE scores for one conversation. Runs evaluation on demand if missing."""
+    from fastapi import HTTPException
+    from ..models.conversation import Conversation
+    from ..services.users import DEFAULT_USER_ID
+
+    conv = await session.get(Conversation, conversation_id)
+    if conv and conv.user_id not in (user.id, DEFAULT_USER_ID):
+        raise HTTPException(status_code=403, detail="Forbidden: you do not own this conversation")
+
     evaluation = await evaluate_conversation(session, conversation_id)
     await session.commit()
     return EvaluationOut(
@@ -34,10 +44,10 @@ async def get_evaluation(
 
 @router.get("/progress/summary", response_model=ProgressSummary)
 async def progress_summary(
+    user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> ProgressSummary:
-    await get_or_create_default_user(session)
-    summary = await get_progress_summary(session, DEFAULT_USER_ID)
+    summary = await get_progress_summary(session, user.id)
     await session.commit()
     return summary
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getProfile, getProgress } from "@/lib/api";
 import type { LearnerProfileOut, ProgressSummary } from "@/lib/types";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -11,18 +11,29 @@ import { TrendLine } from "@/components/progress/TrendLine";
 export default function ProgressPage() {
   const [summary, setSummary] = useState<ProgressSummary | null>(null);
   const [profile, setProfile] = useState<LearnerProfileOut | null>(null);
+  const [lastSync, setLastSync] = useState<string>("");
 
-  useEffect(() => {
+  const fetchLive = useCallback(() => {
     Promise.all([getProgress(), getProfile()])
       .then(([s, p]) => {
         setSummary(s);
         setProfile(p);
+        setLastSync(new Date().toLocaleTimeString());
       })
       .catch(() => {
-        setSummary(null);
-        setProfile(null);
+        // keep existing data on transient error
       });
   }, []);
+
+  useEffect(() => {
+    fetchLive();
+    const id = setInterval(fetchLive, 5000);
+    window.addEventListener("focus", fetchLive);
+    return () => {
+      clearInterval(id);
+      window.removeEventListener("focus", fetchLive);
+    };
+  }, [fetchLive]);
 
   if (!summary || !profile) {
     return (
@@ -44,19 +55,25 @@ export default function ProgressPage() {
             Evidence-based communication evaluation across 14 CORE dimensions.
           </p>
         </div>
-        {isBaseline ? (
-          <Badge tone="cool" className="self-start sm:self-auto py-1 px-3">
-            🎯 Initial Speaking Baseline
-          </Badge>
-        ) : summary.sessions_completed > 1 ? (
-          <Badge tone="good" className="self-start sm:self-auto py-1 px-3">
-            📈 {summary.sessions_completed} Evaluated Sessions
-          </Badge>
-        ) : (
-          <Badge tone="neutral" className="self-start sm:self-auto py-1 px-3">
-            Calibrating
-          </Badge>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#4ade80]/40 bg-[#4ade80]/10 px-2.5 py-1 font-mono text-[10px] font-semibold text-[#4ade80]">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4ade80]" />
+            Live DB Sync {lastSync ? `· ${lastSync}` : ""}
+          </span>
+          {isBaseline ? (
+            <Badge tone="cool" className="self-start sm:self-auto py-1 px-3">
+              🎯 Initial Speaking Baseline
+            </Badge>
+          ) : summary.sessions_completed > 1 ? (
+            <Badge tone="good" className="self-start sm:self-auto py-1 px-3">
+              📈 {summary.sessions_completed} Evaluated Sessions
+            </Badge>
+          ) : (
+            <Badge tone="neutral" className="self-start sm:self-auto py-1 px-3">
+              Calibrating
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Benchmark Overview Cards */}

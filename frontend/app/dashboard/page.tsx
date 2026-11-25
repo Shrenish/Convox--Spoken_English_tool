@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { SpeakingIllustration } from "@/components/illustrations/FeatureIllustrations";
 import { ExecutiveGamificationHub } from "@/components/gamification/ExecutiveGamificationHub";
+import { MentorSyllabusAndDrills } from "@/components/dashboard/MentorSyllabusAndDrills";
 
 function stripMarkdown(text: string) {
   return text.replace(/\*\*/g, "");
@@ -96,21 +97,24 @@ export default function DashboardPage() {
           <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-mint opacity-[0.04] blur-2xl" />
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-3">
+        <div className="flex flex-col items-center text-center gap-6 relative z-10">
+          <div className="flex flex-col items-center space-y-3">
             <Badge tone="cool">
               {user.communication_context ?? "Communication simulator"}
             </Badge>
             <h1 className="text-3xl font-extrabold leading-tight text-slate-50 animate-fade-in-up">
               Welcome back, {user.display_name.split(" ")[0]}.
             </h1>
+            <div className="flex items-center justify-center py-2">
+              <SpeakingIllustration className="w-36 h-36 drop-shadow-md" />
+            </div>
             <p className="max-w-xl text-sm leading-relaxed text-slate-400">
               Continue building your confidence through realistic conversations.
               Every session gives you evidence-based feedback, not just scores.
             </p>
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
               <Link href="/assessment">
-                <Button size="lg" className="bg-gradient-to-r from-accent to-accent-soft text-white hover:opacity-95 shadow-md shadow-accent/20 animate-glow-pulse">
+                <Button size="lg" className="bg-gradient-to-r from-accent to-accent-soft text-black font-bold hover:opacity-95 shadow-md shadow-accent/20 animate-glow-pulse">
                   🎯 Check English Proficiency
                 </Button>
               </Link>
@@ -128,30 +132,26 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
-
-          <div className="hidden lg:flex items-center justify-center p-2">
-            <SpeakingIllustration className="w-36 h-36 drop-shadow-md" />
-          </div>
         </div>
 
         {/* Learning Workflow Step Tracker */}
         <div className="mt-7 pt-6 border-t border-line/40">
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-4 font-semibold">Your learning journey</p>
+          <p className="text-sm uppercase tracking-widest text-slate-300 mb-5 font-bold">Your learning journey</p>
           <div className="flex items-center gap-0">
             {workflowSteps.map((step, i) => (
               <div key={step.id} className="flex items-center flex-1 min-w-0">
-                <div className={`flex flex-col items-center flex-1 min-w-0 ${i <= currentStep ? "opacity-100" : "opacity-35"}`}>
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-lg transition-all ${
+                <div className={`flex flex-col items-center flex-1 min-w-0 ${i <= currentStep ? "opacity-100" : "opacity-45"}`}>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 text-2xl transition-all ${
                     i < currentStep ? "border-mint bg-mint/15 shadow-md shadow-mint/20" :
                     i === currentStep ? "border-accent bg-accent/15 shadow-md shadow-accent/25 animate-glow-pulse" :
                     "border-line bg-surface-2"
                   }`}>
                     {i < currentStep ? "✓" : step.icon}
                   </div>
-                  <p className={`mt-1.5 text-[10px] font-semibold text-center leading-tight ${
-                    i === currentStep ? "text-accent-soft" : i < currentStep ? "text-mint" : "text-slate-500"
+                  <p className={`mt-2 text-sm font-bold text-center leading-tight ${
+                    i === currentStep ? "text-accent-soft" : i < currentStep ? "text-mint" : "text-slate-300"
                   }`}>{step.label}</p>
-                  <p className="text-[9px] text-slate-600 text-center leading-tight hidden sm:block">{step.sub}</p>
+                  <p className="text-xs text-slate-400 text-center leading-tight hidden sm:block mt-0.5">{step.sub}</p>
                 </div>
                 {i < workflowSteps.length - 1 && (
                   <div className={`h-0.5 flex-1 mx-2 rounded transition-all ${i < currentStep ? "bg-mint/50" : "bg-line/40"}`} />
@@ -238,21 +238,29 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* Focus areas */}
+      {/* Focus areas — clickable to launch targeted practice */}
       {progress?.weakest_dimensions && progress.weakest_dimensions.length > 0 && (
         <Card className="p-5">
-          <p className="text-xs uppercase tracking-wide text-slate-400 mb-3">
-            Areas to focus on
-          </p>
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-wide text-slate-400">
+              Areas to focus on (click to practice)
+            </p>
+            <span className="font-mono text-[10px] text-[#a3e635]">Targeted Arena →</span>
+          </div>
           <div className="flex flex-wrap gap-2">
-            {progress.weakest_dimensions.map((dim) => (
-              <span
-                key={dim}
-                className="rounded-full border border-amber/30 bg-amber/10 px-3 py-1 text-xs text-amber"
-              >
-                {dim}
-              </span>
-            ))}
+            {progress.weakest_dimensions.map((dim) => {
+              const targetScenario =
+                scenarios[0]?.scenario_key || recommend?.scenario_key || "introduce_classmate";
+              return (
+                <Link
+                  key={dim}
+                  href={`/conversation?scenario=${encodeURIComponent(targetScenario)}&focus=${encodeURIComponent(dim)}`}
+                  className="rounded-full border border-[#a3e635]/40 bg-[#a3e635]/10 px-3 py-1.5 text-xs font-semibold text-[#bef264] transition hover:border-[#ec4899] hover:bg-[#ec4899]/15 hover:text-[#f472b6]"
+                >
+                  🎯 {dim.replace(/_/g, " ")} →
+                </Link>
+              );
+            })}
           </div>
           {progress.recommended_focus && (
             <p className="mt-3 text-xs text-slate-400">
@@ -260,6 +268,16 @@ export default function DashboardPage() {
             </p>
           )}
         </Card>
+      )}
+
+      {/* AI Mentor Syllabus & 2-Minute Micro-Challenge */}
+      {!dataLoading && (
+        <MentorSyllabusAndDrills
+          progress={progress}
+          context={user.communication_context}
+          scenarios={scenarios}
+          defaultScenarioKey={recommend?.scenario_key || "introduce_classmate"}
+        />
       )}
 
       {/* Quick scenario picker */}

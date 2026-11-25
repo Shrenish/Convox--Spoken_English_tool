@@ -48,7 +48,7 @@ async def start_journey(
                 journey_id=journey.id,
                 stage_key=stage_def.stage_key,
                 stage_index=index,
-                status="active" if index == 0 else "locked",
+                status="active",
                 scenario_id=scenario.id if scenario else None,
             )
         )
@@ -87,7 +87,8 @@ async def start_stage(
     """Open the conversation for an active stage. Returns the first AI turn."""
     journey, stage = await _require_stage(session, journey_id, stage_key)
     if stage.status != "active":
-        raise StageNotActive(stage_key)
+        stage.status = "active"
+        await session.flush()
 
     scenario = await session.get(DbScenario, stage.scenario_id)
     if scenario is None:

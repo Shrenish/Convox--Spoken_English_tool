@@ -309,7 +309,7 @@ class ConversationEngine:
         raw = await asyncio.get_event_loop().run_in_executor(
             None,
             lambda: llm_service.complete(
-                system=system, messages=messages, max_tokens=300, temperature=0.6
+                system=system, messages=messages, max_tokens=450, temperature=0.6
             ),
         )
         if not raw.strip():
@@ -323,6 +323,20 @@ class ConversationEngine:
                 ev = await self._record_event(session, conv, parsed["event_fired"])
                 event = ev
             return reply[:1200], event, bool(parsed.get("conversation_done"))
+
+        # Resilient partial-JSON extractor so truncated JSON never leaks to the UI
+        import re
+        reply_match = re.search(r'"reply"\s*:\s*"((?:[^"\\]|\\.)*)"', raw)
+        if reply_match:
+            extracted_reply = reply_match.group(1).encode("utf-8").decode("unicode_escape", errors="ignore").strip()
+            event = None
+            ev_match = re.search(r'"event_fired"\s*:\s*"([^"]+)"', raw)
+            if ev_match and remaining:
+                ev = await self._record_event(session, conv, ev_match.group(1))
+                event = ev
+            done_match = re.search(r'"conversation_done"\s*:\s*(true|false)', raw, re.I)
+            done = bool(done_match and done_match.group(1).lower() == "true")
+            return extracted_reply[:1200], event, done
 
         # Plain-text fallback.
         return raw.strip().strip('"')[:1200], None, False

@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen antialiased transition-colors duration-200">
         <ThemeProvider>
           <AuthProvider>
-            <div className="mx-auto flex min-h-screen max-w-4xl flex-col px-4">
+            <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col px-3 sm:px-5">
               <NavBar />
               <main className="flex-1 pb-16">{children}</main>
               <footer className="py-6 text-center text-[11px] text-slate-500">

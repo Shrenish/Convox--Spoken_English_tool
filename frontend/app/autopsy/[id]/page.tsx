@@ -69,14 +69,23 @@ export default function AutopsyPage({ params }: { params: { id: string } }) {
           <div>
             <p className="text-xs uppercase tracking-wide text-slate-400">Communication readiness</p>
             <p className="text-5xl font-extrabold text-accent-soft">
-              {evaluation.readiness_score.toFixed(1)}
+              {evaluation.readiness_score != null ? evaluation.readiness_score.toFixed(1) : "—"}
               <span className="text-lg text-slate-500">/10</span>
             </p>
           </div>
           <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
-            <Metric label="Recovery index" value={evaluation.recovery_index.toFixed(2)} />
-            <Metric label="Vocab recovery" value={evaluation.vocab_recovery_index.toFixed(2)} />
-            <Metric label="Intl. gap" value={evaluation.intl_gap.toFixed(1)} />
+            <Metric
+              label="Recovery index"
+              value={evaluation.recovery_index != null ? evaluation.recovery_index.toFixed(2) : "—"}
+            />
+            <Metric
+              label="Vocab recovery"
+              value={evaluation.vocab_recovery_index != null ? evaluation.vocab_recovery_index.toFixed(2) : "—"}
+            />
+            <Metric
+              label="Intl. gap"
+              value={evaluation.intl_gap != null ? evaluation.intl_gap.toFixed(1) : "—"}
+            />
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-400">Confidence</span>
               <Badge tone={CONF_TONE[evaluation.confidence] ?? "neutral"}>{evaluation.confidence}</Badge>

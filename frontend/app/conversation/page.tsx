@@ -45,6 +45,7 @@ function ScenarioPicker({
 function ConversationRoute() {
   const sp = useSearchParams();
   const requested = sp.get("scenario");
+  const focus = sp.get("focus") ?? undefined;
   const [scenarioKey, setScenarioKey] = useState<string | null>(requested);
   const [scenarios, setScenarios] = useState<ScenarioOut[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,10 +63,11 @@ function ConversationRoute() {
 
   if (scenarioKey) {
     return (
-      <div className="flex h-[72vh] flex-col overflow-hidden rounded-2xl border border-line bg-surface">
+      <div className="flex min-h-[82vh] flex-col overflow-hidden rounded-2xl border border-[#464554]/50 bg-[#10131a] shadow-2xl">
         <ConversationView
           key={scenarioKey}
           scenarioKey={scenarioKey}
+          focus={focus}
           onFinished={(id) => {
             window.location.href = `/autopsy/${id}`;
           }}
